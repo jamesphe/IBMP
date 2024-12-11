@@ -75,8 +75,8 @@
               <template slot-scope="{row}">
                 <el-button
                   type="text"
-                  :disabled="row.status !== 'success'"
                   @click="handleRestore(row)"
+                  :disabled="row.status !== 'success'"
                 >
                   恢复
                 </el-button>

@@ -30,13 +30,21 @@ module.exports = {
   lintOnSave: false,
   productionSourceMap: false,
   devServer: {
+    host: 'localhost',
     port: port,
     open: true,
     overlay: {
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
+    before: require('./mock/mock-server.js'),
+    proxy: {
+      '/sockjs-node': {
+        target: `http://localhost:${port}`,
+        ws: true,
+        changeOrigin: true
+      }
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

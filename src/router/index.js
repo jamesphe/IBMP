@@ -219,11 +219,22 @@ export const asyncRoutes = [
         path: 'it',
         component: () => import('@/views/campus/it/index'),
         name: 'IT',
+        redirect: '/campus/it/index',
         meta: {
           title: 'IT运维管理系统',
           icon: 'el-icon-monitor'
         },
         children: [
+          {
+            path: 'index',
+            component: () => import('@/views/campus/it/index'),
+            name: 'ITDashboard',
+            meta: { 
+              title: '系统概览',
+              noCache: true,
+              hidden: true
+            }
+          },
           {
             path: 'event',
             component: () => import('@/views/campus/it/event/index'),
