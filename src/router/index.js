@@ -250,7 +250,38 @@ export const asyncRoutes = [
                 name: 'EventRegister',
                 meta: {
                   title: '事件登记',
-                  icon: 'el-icon-edit-outline'
+                  icon: 'el-icon-plus',
+                  roles: ['admin', 'registrar']
+                }
+              },
+              {
+                path: 'process',
+                component: () => import('@/views/campus/it/event/process'),
+                name: 'EventProcess',
+                meta: {
+                  title: '事件处理',
+                  icon: 'el-icon-s-operation',
+                  roles: ['admin', 'handler']
+                }
+              },
+              {
+                path: 'history',
+                component: () => import('@/views/campus/it/event/history'),
+                name: 'EventHistory',
+                meta: {
+                  title: '历史查询',
+                  icon: 'el-icon-time',
+                  roles: ['admin', 'handler', 'registrar']
+                }
+              },
+              {
+                path: 'statistics',
+                component: () => import('@/views/campus/it/event/statistics'),
+                name: 'EventStatistics',
+                meta: {
+                  title: '时效统计',
+                  icon: 'el-icon-data-line',
+                  roles: ['admin']
                 }
               },
               {
@@ -258,9 +289,20 @@ export const asyncRoutes = [
                 component: () => import('@/views/campus/it/event/category'),
                 name: 'EventCategory',
                 meta: {
-                  title: '事件分类',
-                  icon: 'el-icon-collection-tag'
+                  title: '分类管理',
+                  icon: 'el-icon-collection-tag',
+                  roles: ['admin']
                 }
+              },
+              {
+                path: 'detail/:id',
+                component: () => import('@/views/campus/it/event/detail'),
+                name: 'EventDetail',
+                meta: {
+                  title: '事件详情',
+                  noCache: true
+                },
+                hidden: true
               }
             ]
           },

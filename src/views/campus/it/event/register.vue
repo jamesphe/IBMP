@@ -1,295 +1,164 @@
 <template>
   <div class="app-container">
-    <div class="page-header">
-      <div class="title">事件登记</div>
-      <el-button type="primary" icon="el-icon-plus" @click="handleCreate">
-        新增事件
-      </el-button>
-    </div>
-
-    <el-card class="search-card" shadow="never">
-      <el-form :inline="true" :model="listQuery" size="medium">
-        <el-form-item label="关键词">
-          <el-input
-            v-model="listQuery.search"
-            placeholder="事件编号/标题"
-            class="filter-item"
-            @keyup.enter.native="handleFilter"
-          />
-        </el-form-item>
-        <el-form-item label="事件类型">
-          <el-select
-            v-model="listQuery.type"
-            placeholder="请选择"
-            clearable
-            class="filter-item"
-          >
-            <el-option
-              v-for="item in typeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="优先级">
-          <el-select
-            v-model="listQuery.priority"
-            placeholder="请选择"
-            clearable
-            class="filter-item"
-          >
-            <el-option
-              v-for="item in priorityOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select
-            v-model="listQuery.status"
-            placeholder="请选择"
-            clearable
-            class="filter-item"
-          >
-            <el-option
-              v-for="item in statusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="时间范围">
-          <el-date-picker
-            v-model="listQuery.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            class="filter-item"
-            value-format="yyyy-MM-dd"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            type="primary"
-            icon="el-icon-search"
-            @click="handleFilter"
-          >
-            搜索
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <el-card class="table-card" shadow="never">
-      <div class="table-operations" v-if="selectedRows.length > 0">
-        <span class="selected-count">已选择 {{ selectedRows.length }} 项</span>
-        <el-button type="text" @click="handleBatchDelete">批量删除</el-button>
-        <el-button type="text" @click="handleBatchProcess">批量处理</el-button>
+    <div class="k-page-header">
+      <div class="left">
+        <div class="title">事件登记</div>
+        <div class="description">记录和分类IT系统中发生的各类事件</div>
       </div>
-      
-      <el-table
-        v-loading="listLoading"
-        :data="list"
-        border
-        fit
-        highlight-current-row
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="事件编号" prop="id" align="center" width="120" />
-        <el-table-column label="事件标题" prop="title" align="center" min-width="150" />
-        <el-table-column label="事件类型" align="center" width="120">
-          <template slot-scope="{row}">
-            <el-tag :type="row.type | typeFilter">{{ row.type | typeNameFilter }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="优先级" align="center" width="100">
-          <template slot-scope="{row}">
-            <el-tag :type="row.priority | priorityFilter">
-              {{ row.priority | priorityNameFilter }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="影响范围" prop="impact" align="center" width="120">
-          <template slot-scope="{row}">
-            <el-tag :type="row.impact | impactFilter">
-              {{ row.impact | impactNameFilter }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" align="center" width="100">
-          <template slot-scope="{row}">
-            <el-tag :type="row.status | statusFilter">
-              {{ row.status | statusNameFilter }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="报告人" prop="reporter" align="center" width="120" />
-        <el-table-column label="处理人" prop="handler" align="center" width="120" />
-        <el-table-column label="创建时间" prop="createTime" align="center" width="180" />
-        <el-table-column label="操作" align="center" width="250">
-          <template slot-scope="{row}">
-            <el-button-group>
-              <el-button
-                size="mini"
-                type="primary"
-                icon="el-icon-edit"
-                @click="handleUpdate(row)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                size="mini"
-                type="success"
-                icon="el-icon-check"
-                @click="handleProcess(row)"
-              >
-                处理
-              </el-button>
-              <el-button
-                size="mini"
-                type="danger"
-                icon="el-icon-delete"
-                @click="handleDelete(row)"
-              >
-                删除
-              </el-button>
-            </el-button-group>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <div class="pagination-container">
-        <el-pagination
-          :current-page="listQuery.page"
-          :page-sizes="[10, 20, 30, 50]"
-          :page-size="listQuery.limit"
-          :total="total"
-          background
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
-
-    <el-dialog
-      :title="textMap[dialogStatus]"
-      :visible.sync="dialogVisible"
-      width="680px"
-      :close-on-click-modal="false"
-      :destroy-on-close="true"
-    >
-      <el-form
-        ref="dataForm"
-        :model="temp"
-        :rules="rules"
-        label-width="100px"
-        class="event-form"
-      >
-        <el-form-item label="事件标题" prop="title">
-          <el-input v-model="temp.title" placeholder="请输入事件标题" />
-        </el-form-item>
-        <el-form-item label="事件类型" prop="type">
-          <el-select v-model="temp.type" placeholder="请选择事件类型">
-            <el-option
-              v-for="item in typeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="优先级" prop="priority">
-          <el-select v-model="temp.priority" placeholder="请选择优先级">
-            <el-option
-              v-for="item in priorityOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="影响范围" prop="impact">
-          <el-select v-model="temp.impact" placeholder="请选择影响范围">
-            <el-option label="个人" value="personal" />
-            <el-option label="部门" value="department" />
-            <el-option label="全校" value="school" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="事件描述" prop="description">
-          <el-input
-            v-model="temp.description"
-            type="textarea"
-            :rows="4"
-            placeholder="请详细描述事件内容"
-          />
-        </el-form-item>
-        <el-form-item label="附件">
-          <el-upload
-            class="upload-demo"
-            action="https://jsonplaceholder.typicode.com/posts/"
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :before-remove="beforeRemove"
-            multiple
-            :limit="3"
-            :file-list="fileList"
-          >
-            <el-button size="small" type="primary">点击上传</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传jpg/png/pdf文件，且不超过10MB</div>
-          </el-upload>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogStatus === 'create' ? createData() : updateData()">
-          确定
+      <div class="right">
+        <el-button @click="$router.go(-1)">取消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+          提交
         </el-button>
       </div>
-    </el-dialog>
+    </div>
 
-    <el-dialog
-      title="事件处理"
-      :visible.sync="processDialogVisible"
-      width="500px"
-      :close-on-click-modal="false"
-    >
+    <el-card class="k-form-card" shadow="never">
       <el-form
-        ref="processForm"
-        :model="processForm"
-        :rules="processRules"
-        label-width="100px"
+        ref="eventForm"
+        :model="formData"
+        :rules="rules"
+        label-width="120px"
+        size="medium"
       >
-        <el-form-item label="处理状态" prop="status">
-          <el-select v-model="processForm.status" placeholder="请选择处理状态">
-            <el-option label="处理中" value="processing" />
-            <el-option label="已解决" value="resolved" />
-            <el-option label="已关闭" value="closed" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="处理说明" prop="comment">
-          <el-input
-            v-model="processForm.comment"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入处理说明"
-          />
-        </el-form-item>
-        <el-form-item label="处理人" prop="handler">
-          <el-input v-model="processForm.handler" placeholder="请输入处理人" />
-        </el-form-item>
+        <!-- 基本信息 -->
+        <div class="k-form-section">
+          <div class="section-header">
+            <div class="section-line" />
+            <div class="section-title">基本信息</div>
+          </div>
+          
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="事件标题" prop="title">
+                <el-input
+                  v-model="formData.title"
+                  placeholder="请输入事件标题"
+                  maxlength="100"
+                  show-word-limit
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="事件类型" prop="type">
+                <el-select
+                  v-model="formData.type"
+                  placeholder="请选择事件类型"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in typeOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                    <i :class="item.icon" :style="{ color: item.color }" />
+                    {{ item.label }}
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <!-- 影响评估 -->
+        <div class="k-form-section">
+          <div class="section-header">
+            <div class="section-line" />
+            <div class="section-title">影响评估</div>
+          </div>
+
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <el-form-item label="优先级" prop="priority">
+                <el-select
+                  v-model="formData.priority"
+                  placeholder="请选择优先级"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in priorityOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                    <el-tag :type="item.type" size="small">{{ item.label }}</el-tag>
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="影响范围" prop="impact">
+                <el-select
+                  v-model="formData.impact"
+                  placeholder="请选择影响范围"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in impactOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                    <el-tag :type="item.type" size="small">{{ item.label }}</el-tag>
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+
+        <!-- 详细描述 -->
+        <div class="k-form-section">
+          <div class="section-header">
+            <div class="section-line" />
+            <div class="section-title">详细描述</div>
+          </div>
+
+          <el-form-item label="事件描述" prop="description">
+            <el-input
+              v-model="formData.description"
+              type="textarea"
+              :rows="4"
+              placeholder="请详细描述事件的具体情况，包括：发生时间、现象表现、影响程度等"
+              maxlength="500"
+              show-word-limit
+            />
+          </el-form-item>
+        </div>
+
+        <!-- 附件信息 -->
+        <div class="k-form-section">
+          <div class="section-header">
+            <div class="section-line" />
+            <div class="section-title">附件信息</div>
+          </div>
+
+          <el-form-item label="相关附件">
+            <el-upload
+              class="k-uploader"
+              action="/dev-api/it/events/upload"
+              :file-list="fileList"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :before-remove="beforeRemove"
+              :before-upload="beforeUpload"
+              multiple
+              :limit="5"
+              drag
+            >
+              <i class="el-icon-upload" />
+              <div class="el-upload__text">
+                将文件拖到此处，或<em>点击上传</em>
+              </div>
+              <div slot="tip" class="el-upload__tip">
+                支持格式：.jpg、.png、.pdf、.doc、.docx、.xls、.xlsx，单个文件不超过10MB
+              </div>
+            </el-upload>
+          </el-form-item>
+        </div>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="processDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitProcess">确定</el-button>
-      </div>
-    </el-dialog>
+    </el-card>
   </div>
 </template>
 
@@ -298,326 +167,119 @@ import request from '@/utils/request'
 
 export default {
   name: 'EventRegister',
-  filters: {
-    typeFilter(type) {
-      const typeMap = {
-        hardware: 'warning',
-        software: 'success',
-        network: 'danger',
-        other: 'info'
-      }
-      return typeMap[type]
-    },
-    typeNameFilter(type) {
-      const typeMap = {
-        hardware: '硬件故障',
-        software: '软件故障',
-        network: '网络故障',
-        other: '其他'
-      }
-      return typeMap[type]
-    },
-    priorityFilter(priority) {
-      const priorityMap = {
-        high: 'danger',
-        medium: 'warning',
-        low: 'info'
-      }
-      return priorityMap[priority]
-    },
-    priorityNameFilter(priority) {
-      const priorityMap = {
-        high: '高',
-        medium: '中',
-        low: '低'
-      }
-      return priorityMap[priority]
-    },
-    statusFilter(status) {
-      const statusMap = {
-        pending: 'info',
-        processing: 'warning',
-        validating: 'success',
-        completed: ''
-      }
-      return statusMap[status]
-    },
-    statusNameFilter(status) {
-      const statusMap = {
-        pending: '待处理',
-        processing: '处理中',
-        validating: '待验证',
-        completed: '已完成'
-      }
-      return statusMap[status]
-    },
-    impactFilter(impact) {
-      const impactMap = {
-        personal: 'info',
-        department: 'warning',
-        school: 'danger'
-      }
-      return impactMap[impact]
-    },
-    impactNameFilter(impact) {
-      const impactMap = {
-        personal: '个人',
-        department: '部门',
-        school: '全校'
-      }
-      return impactMap[impact]
-    }
-  },
   data() {
     return {
-      list: null,
-      total: 0,
-      listLoading: true,
-      selectedRows: [],
-      listQuery: {
-        page: 1,
-        limit: 10,
-        search: '',
-        type: '',
-        priority: '',
-        status: '',
-        dateRange: []
-      },
-      typeOptions: [
-        { label: '硬件故障', value: 'hardware' },
-        { label: '软件故障', value: 'software' },
-        { label: '网络故障', value: 'network' },
-        { label: '其他', value: 'other' }
-      ],
-      priorityOptions: [
-        { label: '高', value: 'high' },
-        { label: '中', value: 'medium' },
-        { label: '低', value: 'low' }
-      ],
-      statusOptions: [
-        { label: '待处理', value: 'pending' },
-        { label: '处理中', value: 'processing' },
-        { label: '待验证', value: 'validating' },
-        { label: '已完成', value: 'completed' }
-      ],
-      temp: {
-        id: undefined,
+      submitLoading: false,
+      fileList: [],
+      formData: {
         title: '',
         type: '',
         priority: '',
         impact: '',
-        status: 'pending',
-        description: '',
-        reporter: '',
-        handler: '',
-        createTime: new Date()
-      },
-      processForm: {
-        status: '',
-        comment: '',
-        handler: ''
-      },
-      processRules: {
-        status: [
-          { required: true, message: '请选择处理状态', trigger: 'change' }
-        ],
-        comment: [
-          { required: true, message: '请输入处理说明', trigger: 'blur' }
-        ],
-        handler: [
-          { required: true, message: '请输入处理人', trigger: 'blur' }
-        ]
-      },
-      dialogVisible: false,
-      processDialogVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '编辑事件',
-        create: '新增事件'
+        description: ''
       },
       rules: {
-        title: [{ required: true, message: '请输入事件标题', trigger: 'blur' }],
-        type: [{ required: true, message: '请选择事件类型', trigger: 'change' }],
-        priority: [{ required: true, message: '请选择优先级', trigger: 'change' }],
-        impact: [{ required: true, message: '请选择影响范围', trigger: 'change' }],
-        description: [{ required: true, message: '请输入事件描述', trigger: 'blur' }]
+        title: [
+          { required: true, message: '请输入事件标题', trigger: 'blur' },
+          { min: 5, max: 100, message: '长度在 5 到 100 个字符', trigger: 'blur' }
+        ],
+        type: [
+          { required: true, message: '请选择事件类型', trigger: 'change' }
+        ],
+        priority: [
+          { required: true, message: '请选择优先级', trigger: 'change' }
+        ],
+        impact: [
+          { required: true, message: '请选择影响范围', trigger: 'change' }
+        ],
+        description: [
+          { required: true, message: '请输入事件描述', trigger: 'blur' },
+          { min: 10, max: 500, message: '长度在 10 到 500 个字符', trigger: 'blur' }
+        ]
       },
-      fileList: []
+      typeOptions: [
+        { label: '硬件故障', value: 'hardware', icon: 'el-icon-cpu', color: '#E6A23C' },
+        { label: '软件故障', value: 'software', icon: 'el-icon-monitor', color: '#409EFF' },
+        { label: '网络故障', value: 'network', icon: 'el-icon-connection', color: '#F56C6C' },
+        { label: '其他', value: 'other', icon: 'el-icon-more', color: '#909399' }
+      ],
+      priorityOptions: [
+        { label: '高', value: 'high', type: 'danger' },
+        { label: '中', value: 'medium', type: 'warning' },
+        { label: '低', value: 'low', type: 'info' }
+      ],
+      impactOptions: [
+        { label: '全校', value: 'school', type: 'danger' },
+        { label: '部门', value: 'department', type: 'warning' },
+        { label: '个人', value: 'personal', type: 'info' }
+      ]
     }
   },
-  created() {
-    this.getList()
-  },
   methods: {
-    handleSizeChange(val) {
-      this.listQuery.limit = val
-      this.getList()
-    },
-    handleCurrentChange(val) {
-      this.listQuery.page = val
-      this.getList()
-    },
-    async getList() {
-      this.listLoading = true
-      try {
-        const { data } = await request({
-          url: '/dev-api/it/events',
-          method: 'get',
-          params: this.listQuery
-        })
-        this.list = data.items
-        this.total = data.total
-      } catch (error) {
-        console.error('获取事件列表失败:', error)
-      } finally {
-        this.listLoading = false
-      }
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleCreate() {
-      this.temp = {
-        id: undefined,
-        title: '',
-        type: '',
-        priority: '',
-        impact: '',
-        status: 'pending',
-        description: '',
-        reporter: '',
-        handler: '',
-        createTime: new Date()
-      }
-      this.dialogStatus = 'create'
-      this.dialogVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    async createData() {
-      this.$refs['dataForm'].validate(async (valid) => {
+    handleSubmit() {
+      this.$refs.eventForm.validate(async valid => {
         if (valid) {
+          this.submitLoading = true
           try {
+            const formData = {
+              ...this.formData,
+              attachments: this.fileList.map(file => ({
+                name: file.name,
+                url: file.url
+              }))
+            }
+            
             await request({
-              url: '/it/events',
+              url: '/dev-api/it/events',
               method: 'post',
-              data: this.temp
+              data: formData
             })
-            this.dialogVisible = false
+
             this.$notify({
               title: '成功',
-              message: '创建成功',
+              message: '事件登记成功',
               type: 'success',
               duration: 2000
             })
-            this.getList()
+
+            this.$router.push('/campus/it/event/process')
           } catch (error) {
-            console.error('创建事件失败:', error)
+            this.$notify({
+              title: '错误',
+              message: '事件登记失败',
+              type: 'error',
+              duration: 2000
+            })
+          } finally {
+            this.submitLoading = false
           }
         }
       })
     },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
-      this.dialogVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          // 这里应该调用后端API更新数据
-          this.dialogVisible = false
-          this.$notify({
-            title: '成功',
-            message: '更新成功',
-            type: 'success',
-            duration: 2000
-          })
-          this.getList()
-        }
-      })
-    },
-    handleProcess(row) {
-      this.processForm = {
-        status: '',
-        comment: '',
-        handler: ''
+    beforeUpload(file) {
+      const isValidType = [
+        'image/jpeg',
+        'image/png',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ].includes(file.type)
+      const isLt10M = file.size / 1024 / 1024 < 10
+
+      if (!isValidType) {
+        this.$message.error('文件格式不正确!')
+        return false
       }
-      this.processDialogVisible = true
-    },
-    submitProcess() {
-      this.$refs.processForm.validate((valid) => {
-        if (valid) {
-          // 这里应该调用后端API提交处理结果
-          this.processDialogVisible = false
-          this.$notify({
-            title: '成功',
-            message: '处理记录已提交',
-            type: 'success',
-            duration: 2000
-          })
-          this.getList()
-        }
-      })
-    },
-    handleDelete(row) {
-      this.$confirm('确认删除该事件?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 这里应该调用后端API删除数据
-        this.$notify({
-          title: '成功',
-          message: '删除成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
-      })
-    },
-    handleSelectionChange(val) {
-      this.selectedRows = val
-    },
-    handleBatchDelete() {
-      if (this.selectedRows.length === 0) {
-        this.$message.warning('请选择要删除的事件')
-        return
+      if (!isLt10M) {
+        this.$message.error('文件大小不能超过10MB!')
+        return false
       }
-      this.$confirm(`确认删除选中的 ${this.selectedRows.length} 个事件?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 这里调用后端API批量删除数据
-        this.$notify({
-          title: '成功',
-          message: '批量删除成功',
-          type: 'success',
-          duration: 2000
-        })
-        this.getList()
-      })
-    },
-    handleBatchProcess() {
-      if (this.selectedRows.length === 0) {
-        this.$message.warning('请选择要处理的事件')
-        return
-      }
-      this.processForm = {
-        status: '',
-        comment: '',
-        handler: ''
-      }
-      this.processDialogVisible = true
+      return true
     },
     handlePreview(file) {
-      console.log(file)
+      window.open(file.url)
     },
     handleRemove(file, fileList) {
       this.fileList = fileList
@@ -630,137 +292,117 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary-color: #1890ff;
-$success-color: #52c41a;
-$warning-color: #faad14;
-$error-color: #f5222d;
-$heading-color: #1f1f1f;
-$text-color: #595959;
-$text-color-secondary: #8c8c8c;
-$disabled-color: #bfbfbf;
-$border-color-base: #d9d9d9;
-$background-color-light: #fafafa;
-$box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.15);
+@import '@/styles/variables.scss';
 
-.app-container {
-  padding: 24px;
-  background-color: #f0f2f5;
-}
-
-.page-header {
+.k-page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-
-  .title {
-    font-size: 20px;
-    font-weight: 500;
-    color: $heading-color;
-  }
-}
-
-.search-card {
-  margin-bottom: 24px;
-  
-  :deep(.el-card__body) {
-    padding: 24px 24px 0;
-  }
-
-  .el-form-item {
-    margin-bottom: 24px;
-  }
-}
-
-.table-card {
-  :deep(.el-card__body) {
-    padding: 0;
-  }
-
-  .table-operations {
-    padding: 16px 24px;
-    background: $background-color-light;
-    border-bottom: 1px solid $border-color-base;
-
-    .selected-count {
-      color: $text-color-secondary;
-      margin-right: 16px;
-    }
-  }
-
-  .el-table {
-    :deep(th) {
-      background-color: #fafafa;
-      color: $heading-color;
-      font-weight: 500;
-    }
-
-    :deep(td) {
-      color: $text-color;
-    }
-  }
-}
-
-.pagination-container {
-  padding: 16px 24px;
-  text-align: right;
+  padding: 24px;
   background: #fff;
-  border-top: 1px solid $border-color-base;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+
+  .left {
+    .title {
+      font-size: 20px;
+      font-weight: 500;
+      color: $heading-color;
+      margin-bottom: 8px;
+    }
+
+    .description {
+      font-size: 14px;
+      color: $text-secondary;
+    }
+  }
+
+  .right {
+    .el-button + .el-button {
+      margin-left: 12px;
+    }
+  }
 }
 
-.event-form {
-  padding: 8px 40px 24px;
-  
+.k-form-card {
+  .k-form-section {
+    margin-bottom: 32px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+
+      .section-line {
+        width: 4px;
+        height: 16px;
+        background-color: $primary-color;
+        border-radius: 2px;
+        margin-right: 8px;
+      }
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: $heading-color;
+      }
+    }
+  }
+
   :deep(.el-form-item__label) {
-    color: $heading-color;
     font-weight: 500;
+    color: $text-primary;
   }
 
   :deep(.el-input__inner) {
     border-radius: 2px;
   }
 
-  :deep(.el-textarea__inner) {
-    border-radius: 2px;
+  :deep(.el-select .el-input__inner:focus) {
+    border-color: $primary-color;
+  }
+
+  .k-uploader {
+    :deep(.el-upload-dragger) {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      .el-icon-upload {
+        font-size: 48px;
+        color: $primary-color;
+        margin-bottom: 16px;
+      }
+
+      .el-upload__text {
+        font-size: 14px;
+        color: $text-regular;
+
+        em {
+          color: $primary-color;
+          font-style: normal;
+        }
+      }
+    }
+
+    :deep(.el-upload__tip) {
+      margin-top: 8px;
+      color: $text-secondary;
+    }
   }
 }
 
-:deep(.el-dialog__header) {
-  padding: 16px 24px;
-  border-bottom: 1px solid $border-color-base;
-  
-  .el-dialog__title {
-    font-size: 16px;
-    font-weight: 500;
-    color: $heading-color;
-  }
-}
-
-:deep(.el-dialog__footer) {
-  padding: 16px 24px;
-  border-top: 1px solid $border-color-base;
-}
-
-.el-tag {
-  border-radius: 2px;
-  margin-right: 8px;
-  
-  &.el-tag--success {
-    background: #f6ffed;
-    border-color: #b7eb8f;
-    color: #52c41a;
-  }
-  
-  &.el-tag--warning {
-    background: #fffbe6;
-    border-color: #ffe58f;
-    color: #faad14;
-  }
-  
-  &.el-tag--danger {
-    background: #fff1f0;
-    border-color: #ffa39e;
-    color: #f5222d;
+.el-select-dropdown__item {
+  i {
+    margin-right: 8px;
   }
 }
 </style>
