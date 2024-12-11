@@ -39,8 +39,15 @@ module.exports = {
     },
     before: require('./mock/mock-server.js'),
     proxy: {
-      '/sockjs-node': {
+      [process.env.VUE_APP_BASE_API]: {
         target: `http://localhost:${port}`,
+        changeOrigin: true,
+        pathRewrite: {
+          ['^' + process.env.VUE_APP_BASE_API]: ''
+        }
+      },
+      '/sockjs-node': {
+        target: 'http://localhost:' + port,
         ws: true,
         changeOrigin: true
       }

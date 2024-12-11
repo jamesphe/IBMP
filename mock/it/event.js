@@ -139,5 +139,44 @@ module.exports = [
         data: { success: true }
       }
     }
+  },
+
+  // 事件历史查询
+  {
+    url: '/dev-api/it/events/history',
+    type: 'get',
+    response: config => {
+      return getEventHistory(config)
+    }
   }
-] 
+]
+
+function getEventHistory(config) {
+  const { page = 1, limit = 10 } = config.query
+
+  const list = []
+  const total = 100
+
+  for (let i = 0; i < limit; i++) {
+    const index = (page - 1) * limit + i
+    if (index >= total) break
+
+    list.push({
+      eventId: `EV${String(index + 1).padStart(6, '0')}`,
+      eventName: `测试事件 ${index + 1}`,
+      eventType: ['硬件故障', '软件问题', '网络故障', '安全事件'][Math.floor(Math.random() * 4)],
+      priority: ['高', '中', '低'][Math.floor(Math.random() * 3)],
+      status: ['待处理', '处理中', '已完成', '已关闭'][Math.floor(Math.random() * 4)],
+      createTime: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toLocaleString(),
+      handleTime: `${Math.floor(Math.random() * 48)}小时`
+    })
+  }
+
+  return {
+    code: 20000,
+    data: {
+      total,
+      items: list
+    }
+  }
+} 
