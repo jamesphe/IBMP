@@ -222,7 +222,143 @@ export const asyncRoutes = [
         meta: {
           title: 'IT运维管理系统',
           icon: 'el-icon-monitor'
-        }
+        },
+        children: [
+          {
+            path: 'event',
+            component: () => import('@/views/campus/it/event/index'),
+            name: 'EventManagement',
+            meta: {
+              title: '事件管理',
+              icon: 'el-icon-warning'
+            },
+            children: [
+              {
+                path: 'register',
+                component: () => import('@/views/campus/it/event/register'),
+                name: 'EventRegister',
+                meta: {
+                  title: '事件登记',
+                  icon: 'el-icon-edit-outline'
+                }
+              },
+              {
+                path: 'category',
+                component: () => import('@/views/campus/it/event/category'),
+                name: 'EventCategory',
+                meta: {
+                  title: '事件分类',
+                  icon: 'el-icon-collection-tag'
+                }
+              }
+            ]
+          },
+          {
+            path: 'workorder',
+            component: () => import('@/views/campus/it/workorder/index'),
+            name: 'WorkOrder',
+            meta: {
+              title: '工单管理',
+              icon: 'el-icon-document'
+            },
+            children: [
+              {
+                path: 'create',
+                component: () => import('@/views/campus/it/workorder/create'),
+                name: 'WorkOrderCreate',
+                meta: {
+                  title: '工单创建',
+                  icon: 'el-icon-plus'
+                }
+              },
+              {
+                path: 'process',
+                component: () => import('@/views/campus/it/workorder/process'),
+                name: 'WorkOrderProcess',
+                meta: {
+                  title: '工单处理',
+                  icon: 'el-icon-s-operation'
+                }
+              }
+            ]
+          },
+          {
+            path: 'service',
+            component: () => import('@/views/campus/it/service/index'),
+            name: 'Service',
+            meta: {
+              title: '服务管理',
+              icon: 'el-icon-s-operation'
+            },
+            children: [
+              {
+                path: 'sla',
+                component: () => import('@/views/campus/it/service/sla'),
+                name: 'SLAManagement',
+                meta: {
+                  title: '服务级别管理',
+                  icon: 'el-icon-s-data'
+                }
+              },
+              {
+                path: 'catalog',
+                component: () => import('@/views/campus/it/service/catalog'),
+                name: 'ServiceCatalog',
+                meta: {
+                  title: '服务目录管理',
+                  icon: 'el-icon-notebook-2'
+                }
+              }
+            ]
+          },
+          {
+            path: 'device',
+            component: () => import('@/views/campus/it/device/index'),
+            name: 'Device',
+            meta: {
+              title: '资产与设备',
+              icon: 'el-icon-monitor'
+            },
+            children: [
+              {
+                path: 'loan',
+                component: () => import('@/views/campus/it/device/loan'),
+                name: 'DeviceLoan',
+                meta: {
+                  title: '设备借用管理',
+                  icon: 'el-icon-connection'
+                }
+              },
+              {
+                path: 'asset',
+                component: () => import('@/views/campus/it/device/asset'),
+                name: 'AssetManagement',
+                meta: {
+                  title: '资产专项管理',
+                  icon: 'el-icon-box'
+                }
+              }
+            ]
+          },
+          {
+            path: 'config',
+            component: () => import('@/views/campus/it/config/index'),
+            name: 'Config',
+            meta: {
+              title: '配置变更管理',
+              icon: 'el-icon-setting'
+            }
+          },
+          {
+            path: 'backup',
+            component: () => import('@/views/campus/it/backup/index'),
+            name: 'Backup',
+            meta: {
+              title: '备份恢复管理',
+              icon: 'el-icon-refresh'
+            }
+          }
+        ]
       },
       {
         path: 'asset',
