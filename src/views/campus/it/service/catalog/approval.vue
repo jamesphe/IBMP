@@ -57,27 +57,182 @@
     <el-dialog 
       title="服务条目审批" 
       :visible.sync="dialogVisible"
-      width="50%"
+      width="720px"
+      :close-on-click-modal="false"
+      :destroy-on-close="true"
+      custom-class="approval-dialog"
     >
-      <el-form ref="approvalForm" :model="approvalForm" label-width="100px">
-        <el-form-item label="审批结果">
-          <el-radio-group v-model="approvalForm.result">
-            <el-radio label="approved">通过</el-radio>
-            <el-radio label="rejected">拒绝</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="审批意见">
-          <el-input
-            type="textarea"
-            v-model="approvalForm.comment"
-            :rows="4"
-            placeholder="请输入审批意见"
-          />
-        </el-form-item>
-      </el-form>
+      <div class="approval-content">
+        <!-- 服务信息 -->
+        <div class="info-section">
+          <div class="section-title">服务信息</div>
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <div class="info-item">
+                <span class="label">服务名称：</span>
+                <span class="value">{{ currentRow ? currentRow.serviceName : '' }}</span>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="info-item">
+                <span class="label">变更类型：</span>
+                <span class="value">
+                  <el-tag :type="currentRow && currentRow.type === '新增' ? 'success' : 'warning'">
+                    {{ currentRow ? currentRow.type : '' }}
+                  </el-tag>
+                </span>
+              </div>
+            </el-col>
+          </el-row>
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <div class="info-item">
+                <span class="label">申请人：</span>
+                <span class="value">{{ currentRow ? currentRow.applicant : '' }}</span>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="info-item">
+                <span class="label">申请时间：</span>
+                <span class="value">{{ currentRow ? currentRow.applyTime : '' }}</span>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+
+        <!-- 审批表单 -->
+        <div class="form-section">
+          <div class="section-title">审批信息</div>
+          <el-form 
+            ref="approvalForm" 
+            :model="approvalForm" 
+            :rules="approvalRules"
+            label-width="100px"
+            class="approval-form"
+          >
+            <el-form-item label="审批结果" prop="result" required>
+              <el-radio-group v-model="approvalForm.result">
+                <el-radio label="approved">
+                  <el-tag type="success" size="small">通过</el-tag>
+                </el-radio>
+                <el-radio label="rejected">
+                  <el-tag type="danger" size="small">拒绝</el-tag>
+                </el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="审批意见" prop="comment" required>
+              <el-input
+                type="textarea"
+                v-model="approvalForm.comment"
+                :rows="4"
+                placeholder="请输入审批意见"
+                maxlength="200"
+                show-word-limit
+              />
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitApproval">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 查看详情对话框 -->
+    <el-dialog
+      title="服务条目详情"
+      :visible.sync="detailDialogVisible"
+      width="720px"
+      :close-on-click-modal="false"
+      custom-class="service-dialog"
+    >
+      <div class="service-detail">
+        <!-- 基本信息 -->
+        <div class="detail-section">
+          <div class="section-title">基本信息</div>
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">服务名称：</span>
+                <span class="value">{{ detailForm.serviceName }}</span>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">变更类型：</span>
+                <span class="value">
+                  <el-tag :type="detailForm.type === '新增' ? 'success' : 'warning'">
+                    {{ detailForm.type }}
+                  </el-tag>
+                </span>
+              </div>
+            </el-col>
+          </el-row>
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">服务级别：</span>
+                <span class="value">
+                  <el-tag :type="getServiceLevelType(detailForm.serviceLevel)">
+                    {{ getServiceLevelLabel(detailForm.serviceLevel) }}
+                  </el-tag>
+                </span>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">适用范围：</span>
+                <span class="value">{{ detailForm.scope }}</span>
+              </div>
+            </el-col>
+          </el-row>
+          <el-row :gutter="24">
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">申请人：</span>
+                <span class="value">{{ detailForm.applicant }}</span>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="detail-item">
+                <span class="label">申请时间：</span>
+                <span class="value">{{ detailForm.applyTime }}</span>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+        
+        <!-- 服务描述 -->
+        <div class="detail-section">
+          <div class="section-title">服务描述</div>
+          <div class="detail-item">
+            <div class="description">{{ detailForm.description }}</div>
+          </div>
+        </div>
+        
+        <!-- 审批记录 -->
+        <div class="detail-section">
+          <div class="section-title">审批记录</div>
+          <el-timeline>
+            <el-timeline-item
+              v-for="(activity, index) in detailForm.approvalHistory"
+              :key="index"
+              :type="getTimelineItemType(activity.status)"
+              :timestamp="activity.time"
+            >
+              {{ activity.operator }} {{ activity.action }}
+              <div class="timeline-content" v-if="activity.comment">
+                备注：{{ activity.comment }}
+              </div>
+            </el-timeline-item>
+          </el-timeline>
+        </div>
+      </div>
+      
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="detailDialogVisible = false">关 闭</el-button>
       </div>
     </el-dialog>
   </div>
@@ -124,7 +279,27 @@ export default {
         result: 'approved',
         comment: ''
       },
-      currentRow: null
+      currentRow: null,
+      detailDialogVisible: false,
+      detailForm: {
+        serviceName: '',
+        type: '',
+        serviceLevel: '',
+        description: '',
+        scope: '',
+        applicant: '',
+        applyTime: '',
+        approvalHistory: []
+      },
+      approvalRules: {
+        result: [
+          { required: true, message: '请选择审批结果', trigger: 'change' }
+        ],
+        comment: [
+          { required: true, message: '请输入审批意见', trigger: 'blur' },
+          { min: 5, max: 200, message: '长度在 5 到 200 个字符', trigger: 'blur' }
+        ]
+      }
     }
   },
   methods: {
@@ -145,20 +320,75 @@ export default {
       }
     },
     handleDetail(row) {
-      this.$message.info('查看详情：' + row.serviceName)
+      // 模拟获取详情数据
+      this.detailForm = {
+        serviceName: row.serviceName,
+        type: row.type,
+        serviceLevel: 'level1',
+        description: '这是一个示例服务描述，详细说明了服务的内容和流程。',
+        scope: '全校师生',
+        applicant: row.applicant,
+        applyTime: row.applyTime,
+        approvalHistory: [
+          {
+            operator: row.applicant,
+            action: '提交了服务条目' + row.type + '申请',
+            status: '待审批',
+            time: row.applyTime,
+            comment: ''
+          }
+        ]
+      }
+      // 如果已审批，添加审批记录
+      if (row.status !== '待审批') {
+        this.detailForm.approvalHistory.push({
+          operator: '李四',
+          action: row.status === '已通过' ? '审批通过，同意服务条目' + row.type : '审批拒绝，不同意服务条目' + row.type,
+          status: row.status,
+          time: '2024-01-15 15:30:00',
+          comment: row.status === '已通过' ? '服务条目内容完整，可以发布' : '服务条目内容需要补充完善'
+        })
+      }
+      this.detailDialogVisible = true
     },
     submitApproval() {
-      if (!this.approvalForm.comment) {
-        this.$message.warning('请输入审批意见')
-        return
+      this.$refs.approvalForm.validate((valid) => {
+        if (valid) {
+          // 模拟审批操作
+          const index = this.approvalList.findIndex(item => item.id === this.currentRow.id)
+          if (index > -1) {
+            this.approvalList[index].status = this.approvalForm.result === 'approved' ? '已通过' : '已拒绝'
+          }
+          this.dialogVisible = false
+          this.$message.success('审批成功')
+        }
+      })
+    },
+    getServiceLevelLabel(level) {
+      const levelMap = {
+        level1: '一级服务',
+        level2: '二级服务',
+        level3: '三级服务'
       }
-      // 模拟审批操作
-      const index = this.approvalList.findIndex(item => item.id === this.currentRow.id)
-      if (index > -1) {
-        this.approvalList[index].status = this.approvalForm.result === 'approved' ? '已通过' : '已拒绝'
+      return levelMap[level] || level
+    },
+    getServiceLevelType(level) {
+      const typeMap = {
+        level1: 'danger',
+        level2: 'warning',
+        level3: 'info'
       }
-      this.dialogVisible = false
-      this.$message.success('审批成功')
+      return typeMap[level] || ''
+    },
+    getTimelineItemType(status) {
+      const typeMap = {
+        '通过': 'success',
+        '已通过': 'success',
+        '驳回': 'danger',
+        '已拒绝': 'danger',
+        '待审批': 'primary'
+      }
+      return typeMap[status] || 'info'
     }
   }
 }
@@ -172,5 +402,126 @@ export default {
     margin-right: 10px;
     width: 200px;
   }
+}
+
+.service-dialog {
+  .service-detail {
+    padding: 0 20px;
+    
+    .detail-section {
+      margin-bottom: 24px;
+      
+      .section-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f2f3d;
+        margin-bottom: 16px;
+        padding-left: 8px;
+        border-left: 3px solid #409EFF;
+      }
+      
+      .detail-item {
+        margin-bottom: 16px;
+        
+        .label {
+          display: inline-block;
+          width: 100px;
+          color: #606266;
+        }
+        
+        .value {
+          color: #303133;
+        }
+        
+        .description {
+          color: #303133;
+          line-height: 1.6;
+          padding: 8px 12px;
+          background-color: #f5f7fa;
+          border-radius: 4px;
+        }
+      }
+    }
+    
+    ::v-deep .el-timeline {
+      padding-left: 16px;
+      
+      .el-timeline-item__content {
+        color: #303133;
+        
+        .timeline-content {
+          color: #606266;
+          font-size: 13px;
+          margin-top: 4px;
+        }
+      }
+    }
+  }
+}
+
+.approval-dialog {
+  .approval-content {
+    padding: 0 20px;
+  }
+  
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2f3d;
+    margin-bottom: 16px;
+    padding-left: 8px;
+    border-left: 3px solid #409EFF;
+  }
+  
+  .info-section {
+    margin-bottom: 24px;
+    
+    .info-item {
+      margin-bottom: 16px;
+      
+      .label {
+        display: inline-block;
+        width: 80px;
+        color: #606266;
+      }
+      
+      .value {
+        color: #303133;
+      }
+    }
+  }
+  
+  .form-section {
+    .approval-form {
+      padding: 0;
+      
+      ::v-deep .el-form-item {
+        margin-bottom: 22px;
+        
+        .el-form-item__label {
+          font-weight: normal;
+          color: #606266;
+        }
+        
+        .el-radio {
+          margin-right: 30px;
+          
+          .el-tag {
+            margin-left: 4px;
+          }
+        }
+        
+        .el-form-item__error {
+          padding-top: 2px;
+        }
+      }
+    }
+  }
+}
+
+.dialog-footer {
+  text-align: right;
+  padding-top: 16px;
+  border-top: 1px solid #e4e7ed;
 }
 </style> 

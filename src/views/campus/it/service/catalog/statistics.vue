@@ -14,9 +14,9 @@
         @change="handleDateChange"
         class="filter-item"
       />
-      <el-select 
-        v-model="serviceType" 
-        placeholder="服务类型" 
+      <el-select
+        v-model="serviceType"
+        placeholder="服务类型"
         class="filter-item"
         @change="handleFilterChange"
       >
@@ -30,7 +30,7 @@
     <!-- 统计概览卡片 -->
     <el-row :gutter="20" class="statistics-overview">
       <el-col :span="6" v-for="item in overviewData" :key="item.title">
-        <el-card shadow="hover" class="overview-card">
+        <el-card shadow="hover" class="overview-card" :body-style="{ padding: '20px' }">
           <div class="overview-title">{{ item.title }}</div>
           <div class="overview-value">{{ item.value }}</div>
           <div class="overview-footer">
@@ -45,9 +45,9 @@
     </el-row>
 
     <!-- 使用趋势图 -->
-    <el-card class="chart-card">
+    <el-card class="chart-card" :body-style="{ padding: '20px' }">
       <div slot="header" class="clearfix">
-        <span>服务使用趋势</span>
+        <span class="card-title">服务使用趋势</span>
       </div>
       <div class="chart-container">
         <div ref="trendChart" class="trend-chart" />
@@ -57,9 +57,9 @@
     <!-- 服务排行榜 -->
     <el-row :gutter="20">
       <el-col :span="12">
-        <el-card class="rank-card">
+        <el-card class="rank-card" :body-style="{ padding: '20px' }">
           <div slot="header" class="clearfix">
-            <span>高频服务TOP5</span>
+            <span class="card-title">高频服务TOP5</span>
           </div>
           <div class="rank-list">
             <div v-for="(item, index) in topServices" :key="index" class="rank-item">
@@ -71,9 +71,9 @@
         </el-card>
       </el-col>
       <el-col :span="12">
-        <el-card class="rank-card">
+        <el-card class="rank-card" :body-style="{ padding: '20px' }">
           <div slot="header" class="clearfix">
-            <span>低频服务TOP5</span>
+            <span class="card-title">低频服务TOP5</span>
           </div>
           <div class="rank-list">
             <div v-for="(item, index) in bottomServices" :key="index" class="rank-item">
@@ -258,52 +258,80 @@ export default {
 
 <style lang="scss" scoped>
 .filter-container {
-  padding-bottom: 20px;
-  
+  padding-bottom: 24px;
+  display: flex;
+  align-items: center;
+
   .filter-item {
-    margin-right: 10px;
-    width: 200px;
+    margin-right: 16px;
+    width: 240px;
   }
 }
 
 .statistics-overview {
-  margin-bottom: 20px;
-  
+  margin-bottom: 24px;
+
   .overview-card {
+    height: 140px;
+    transition: all 0.3s;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
     .overview-title {
       font-size: 14px;
       color: #606266;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
-    
+
     .overview-value {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 12px;
       color: #303133;
     }
-    
+
     .overview-footer {
-      font-size: 12px;
+      font-size: 13px;
       color: #909399;
-      
+      display: flex;
+      align-items: center;
+
       .up {
         color: #67C23A;
+        margin-left: 8px;
+        display: flex;
+        align-items: center;
+
+        i {
+          margin-left: 4px;
+          font-size: 12px;
+        }
       }
-      
+
       .down {
         color: #F56C6C;
+        margin-left: 8px;
+        display: flex;
+        align-items: center;
+
+        i {
+          margin-left: 4px;
+          font-size: 12px;
+        }
       }
     }
   }
 }
 
 .chart-card {
-  margin-bottom: 20px;
-  
+  margin-bottom: 24px;
+
   .chart-container {
     height: 400px;
-    
+    padding: 12px 0;
+
     .trend-chart {
       width: 100%;
       height: 100%;
@@ -316,36 +344,69 @@ export default {
     .rank-item {
       display: flex;
       align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #ebeef5;
-      
+      padding: 12px 0;
+      border-bottom: 1px solid #EBEEF5;
+
       &:last-child {
         border-bottom: none;
       }
-      
+
       .rank-index {
-        width: 24px;
-        height: 24px;
-        line-height: 24px;
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
         text-align: center;
-        border-radius: 50%;
-        background: #f5f7fa;
-        margin-right: 10px;
-        
-        &.top1 { background: #f56c6c; color: #fff; }
-        &.top2 { background: #e6a23c; color: #fff; }
-        &.top3 { background: #409eff; color: #fff; }
+        border-radius: 4px;
+        background: #F5F7FA;
+        margin-right: 12px;
+        font-size: 14px;
+        color: #909399;
+        font-weight: 500;
+
+        &.top1 {
+          background: #F56C6C;
+          color: #FFF;
+        }
+
+        &.top2 {
+          background: #E6A23C;
+          color: #FFF;
+        }
+
+        &.top3 {
+          background: #409EFF;
+          color: #FFF;
+        }
       }
-      
+
       .rank-name {
         flex: 1;
-        color: #606266;
+        color: #303133;
+        font-size: 14px;
       }
-      
+
       .rank-value {
-        color: #909399;
+        color: #606266;
+        font-size: 14px;
       }
     }
   }
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+}
+
+::v-deep .el-card__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #EBEEF5;
+}
+
+::v-deep .el-card {
+  border-radius: 4px;
+  border: 1px solid #EBEEF5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 </style> 
