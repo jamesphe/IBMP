@@ -1,19 +1,19 @@
 <template>
   <div class="app-container">
-    <div class="k-page-header">
-      <div class="left">
-        <div class="title">事件登记</div>
-        <div class="description">记录和分类IT系统中发生的各类事件</div>
+    <div class="kd-page-header">
+      <div class="kd-page-header__title">
+        <i class="el-icon-edit-outline" />
+        <span>事件登记</span>
       </div>
-      <div class="right">
-        <el-button @click="$router.go(-1)">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">
+      <div class="kd-page-header__actions">
+        <el-button size="small" @click="$router.go(-1)">取消</el-button>
+        <el-button type="primary" size="small" :loading="submitLoading" @click="handleSubmit">
           提交
         </el-button>
       </div>
     </div>
 
-    <el-card class="k-form-card" shadow="never">
+    <el-card class="kd-form-card">
       <el-form
         ref="eventForm"
         :model="formData"
@@ -22,10 +22,9 @@
         size="medium"
       >
         <!-- 基本信息 -->
-        <div class="k-form-section">
-          <div class="section-header">
-            <div class="section-line" />
-            <div class="section-title">基本信息</div>
+        <div class="kd-form-section">
+          <div class="kd-form-section__header">
+            <span class="kd-form-section__title">基本信息</span>
           </div>
           
           <el-row :gutter="24">
@@ -62,10 +61,9 @@
         </div>
 
         <!-- 影响评估 -->
-        <div class="k-form-section">
-          <div class="section-header">
-            <div class="section-line" />
-            <div class="section-title">影响评估</div>
+        <div class="kd-form-section">
+          <div class="kd-form-section__header">
+            <span class="kd-form-section__title">影响评估</span>
           </div>
 
           <el-row :gutter="24">
@@ -109,10 +107,9 @@
         </div>
 
         <!-- 详细描述 -->
-        <div class="k-form-section">
-          <div class="section-header">
-            <div class="section-line" />
-            <div class="section-title">详细描述</div>
+        <div class="kd-form-section">
+          <div class="kd-form-section__header">
+            <span class="kd-form-section__title">详细描述</span>
           </div>
 
           <el-form-item label="事件描述" prop="description">
@@ -128,15 +125,14 @@
         </div>
 
         <!-- 附件信息 -->
-        <div class="k-form-section">
-          <div class="section-header">
-            <div class="section-line" />
-            <div class="section-title">附件信息</div>
+        <div class="kd-form-section">
+          <div class="kd-form-section__header">
+            <span class="kd-form-section__title">附件信息</span>
           </div>
 
           <el-form-item label="相关附件">
             <el-upload
-              class="k-uploader"
+              class="kd-uploader"
               action="/dev-api/it/events/upload"
               :file-list="fileList"
               :on-preview="handlePreview"
@@ -294,115 +290,83 @@ export default {
 <style lang="scss" scoped>
 @import '@/styles/variables.scss';
 
-.k-page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding: 24px;
+.kd-page-header {
+  padding: 16px 24px;
   background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 16px;
 
-  .left {
-    .title {
-      font-size: 20px;
-      font-weight: 500;
-      color: $heading-color;
-      margin-bottom: 8px;
-    }
+  &__title {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f2633;
 
-    .description {
-      font-size: 14px;
-      color: $text-secondary;
+    i {
+      margin-right: 8px;
+      font-size: 18px;
     }
   }
 
-  .right {
+  &__actions {
+    margin-top: 16px;
+    
     .el-button + .el-button {
-      margin-left: 12px;
+      margin-left: 8px;
     }
   }
 }
 
-.k-form-card {
-  .k-form-section {
-    margin-bottom: 32px;
+.kd-form-card {
+  margin: 16px;
+  
+  :deep(.el-card__body) {
+    padding: 24px;
+  }
+}
 
-    &:last-child {
-      margin-bottom: 0;
-    }
+.kd-form-section {
+  margin-bottom: 24px;
 
-    .section-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 24px;
-
-      .section-line {
-        width: 4px;
-        height: 16px;
-        background-color: $primary-color;
-        border-radius: 2px;
-        margin-right: 8px;
-      }
-
-      .section-title {
-        font-size: 16px;
-        font-weight: 500;
-        color: $heading-color;
-      }
-    }
+  &__header {
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 4px solid #1890ff;
   }
 
-  :deep(.el-form-item__label) {
+  &__title {
+    font-size: 14px;
     font-weight: 500;
-    color: $text-primary;
+    color: #1f2633;
+  }
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 24px;
+  
+  .el-form-item__label {
+    font-size: 14px;
+    color: #4c5664;
   }
 
-  :deep(.el-input__inner) {
+  .el-input__inner {
     border-radius: 2px;
   }
 
-  :deep(.el-select .el-input__inner:focus) {
-    border-color: $primary-color;
-  }
-
-  .k-uploader {
-    :deep(.el-upload-dragger) {
-      width: 100%;
-      height: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      .el-icon-upload {
-        font-size: 48px;
-        color: $primary-color;
-        margin-bottom: 16px;
-      }
-
-      .el-upload__text {
-        font-size: 14px;
-        color: $text-regular;
-
-        em {
-          color: $primary-color;
-          font-style: normal;
-        }
-      }
-    }
-
-    :deep(.el-upload__tip) {
-      margin-top: 8px;
-      color: $text-secondary;
-    }
+  .el-select .el-input__inner:focus {
+    border-color: #1890ff;
   }
 }
 
-.el-select-dropdown__item {
-  i {
-    margin-right: 8px;
+.kd-uploader {
+  :deep(.el-upload-dragger) {
+    border: 1px dashed #d9d9d9;
+    border-radius: 2px;
+    
+    &:hover {
+      border-color: #1890ff;
+    }
   }
 }
 </style>

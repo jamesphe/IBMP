@@ -6,4 +6,13 @@ export function getEventHistory(params) {
     method: 'get',
     params
   })
+}
+
+export function getEventStatistics(query) {
+  console.log('Request URL:', process.env.VUE_APP_BASE_API + '/it/events/statistics')
+  return request({
+    url: '/it/events/statistics',
+    method: 'get',
+    params: query
+  })
 } 

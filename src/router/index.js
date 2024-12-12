@@ -229,7 +229,7 @@ export const asyncRoutes = [
             path: 'index',
             component: () => import('@/views/campus/it/index'),
             name: 'ITDashboard',
-            meta: { 
+            meta: {
               title: '系统概览',
               noCache: true,
               hidden: true
@@ -279,7 +279,7 @@ export const asyncRoutes = [
                 component: () => import('@/views/campus/it/event/statistics'),
                 name: 'EventStatistics',
                 meta: {
-                  title: '时效统计',
+                  title: '事件统计',
                   icon: 'el-icon-data-line',
                   roles: ['admin']
                 }

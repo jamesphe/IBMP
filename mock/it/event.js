@@ -146,37 +146,92 @@ module.exports = [
     url: '/dev-api/it/events/history',
     type: 'get',
     response: config => {
-      return getEventHistory(config)
+      const { page = 1, limit = 10, type, status } = config.query
+
+      // 生成模拟数据
+      const mockList = []
+      for (let i = 0; i < 100; i++) {
+        mockList.push({
+          eventId: `EV${String(i + 1).padStart(6, '0')}`,
+          eventName: `测试事件 ${i + 1}`,
+          eventType: ['硬件故障', '软件问题', '网络故障', '安全事件'][Math.floor(Math.random() * 4)],
+          priority: ['高', '中', '低'][Math.floor(Math.random() * 3)],
+          status: ['待处理', '处理中', '已完成', '已关闭'][Math.floor(Math.random() * 4)],
+          createTime: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toLocaleString(),
+          handleTime: `${Math.floor(Math.random() * 48)}小时`
+        })
+      }
+
+      // 根据查询条件过滤
+      const filteredList = mockList.filter(item => {
+        if (type && item.eventType !== type) return false
+        if (status && item.status !== status) return false
+        return true
+      })
+
+      // 分页处理
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const pageList = filteredList.slice(startIndex, endIndex)
+
+      return {
+        code: 20000,
+        data: {
+          total: filteredList.length,
+          items: pageList
+        }
+      }
+    }
+  },
+
+  // 事件失效统计
+  {
+    url: '/dev-api/it/events/statistics',
+    type: 'get',
+    response: config => {
+      const items = []
+      const count = 20
+
+      for (let i = 0; i < count; i++) {
+        items.push({
+          eventId: 'EV' + (100000 + i),
+          eventType: ['硬件故障', '软件故障', '网络故障'][i % 3],
+          handler: ['张三', '李四', '王五'][i % 3],
+          handleTime: Math.floor(Math.random() * 24),
+          status: ['处理中', '已完成', '已关闭'][i % 3]
+        })
+      }
+
+      const timelineData = {
+        xAxis: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+        series: [4, 6, 3, 8, 5, 2, 4],
+        type: 'line'
+      }
+
+      const typeData = {
+        xAxis: ['硬件故障', '软件故障', '网络故障'],
+        series: [12, 8, 15],
+        type: 'bar',
+        barWidth: '40%'
+      }
+
+      const handlerData = {
+        xAxis: ['张三', '李四', '王五'],
+        series: [10, 8, 12],
+        type: 'bar',
+        barWidth: '40%'
+      }
+
+      return {
+        code: 20000,
+        data: {
+          total: items.length,
+          items: items,
+          timelineData,
+          typeData,
+          handlerData
+        }
+      }
     }
   }
-]
-
-function getEventHistory(config) {
-  const { page = 1, limit = 10 } = config.query
-
-  const list = []
-  const total = 100
-
-  for (let i = 0; i < limit; i++) {
-    const index = (page - 1) * limit + i
-    if (index >= total) break
-
-    list.push({
-      eventId: `EV${String(index + 1).padStart(6, '0')}`,
-      eventName: `测试事件 ${index + 1}`,
-      eventType: ['硬件故障', '软件问题', '网络故障', '安全事件'][Math.floor(Math.random() * 4)],
-      priority: ['高', '中', '低'][Math.floor(Math.random() * 3)],
-      status: ['待处理', '处理中', '已完成', '已关闭'][Math.floor(Math.random() * 4)],
-      createTime: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toLocaleString(),
-      handleTime: `${Math.floor(Math.random() * 48)}小时`
-    })
-  }
-
-  return {
-    code: 20000,
-    data: {
-      total,
-      items: list
-    }
-  }
-} 
+] 
