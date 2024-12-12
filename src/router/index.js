@@ -336,30 +336,77 @@ export const asyncRoutes = [
             ]
           },
           {
-            path: 'service',
-            component: () => import('@/views/campus/it/service/index'),
-            name: 'Service',
+            path: 'sla',
+            component: () => import('@/views/campus/it/service/sla/index'),
+            name: 'SLAManagement',
             meta: {
-              title: '服务管理',
-              icon: 'el-icon-s-operation'
+              title: '服务级别管理',
+              icon: 'el-icon-s-data'
             },
             children: [
               {
-                path: 'sla',
-                component: () => import('@/views/campus/it/service/sla'),
-                name: 'SLAManagement',
+                path: 'definition',
+                component: () => import('@/views/campus/it/service/sla/definition'),
+                name: 'SLADefinition',
                 meta: {
-                  title: '服务级别管理',
-                  icon: 'el-icon-s-data'
+                  title: 'SLA指标定义',
+                  icon: 'el-icon-edit-outline'
                 }
               },
               {
-                path: 'catalog',
-                component: () => import('@/views/campus/it/service/catalog'),
-                name: 'ServiceCatalog',
+                path: 'monitor',
+                component: () => import('@/views/campus/it/service/sla/monitor'),
+                name: 'SLAMonitor',
                 meta: {
-                  title: '服务目录管理',
-                  icon: 'el-icon-notebook-2'
+                  title: 'SLA实时监控',
+                  icon: 'el-icon-monitor'
+                }
+              },
+              {
+                path: 'statistics',
+                component: () => import('@/views/campus/it/service/sla/statistics'),
+                name: 'SLAStatistics',
+                meta: {
+                  title: 'SLA达成统计',
+                  icon: 'el-icon-data-analysis'
+                }
+              }
+            ]
+          },
+          {
+            path: 'catalog',
+            component: () => import('@/views/campus/it/service/catalog/index'),
+            name: 'ServiceCatalog',
+            meta: {
+              title: '服务目录管理',
+              icon: 'el-icon-notebook-2'
+            },
+            children: [
+              {
+                path: 'maintenance',
+                component: () => import('@/views/campus/it/service/catalog/maintenance'),
+                name: 'CatalogMaintenance',
+                meta: {
+                  title: '目录维护',
+                  icon: 'el-icon-edit-outline'
+                }
+              },
+              {
+                path: 'approval',
+                component: () => import('@/views/campus/it/service/catalog/approval'),
+                name: 'CatalogApproval',
+                meta: {
+                  title: '条目审批',
+                  icon: 'el-icon-s-check'
+                }
+              },
+              {
+                path: 'statistics',
+                component: () => import('@/views/campus/it/service/catalog/statistics'),
+                name: 'CatalogStatistics',
+                meta: {
+                  title: '使用统计',
+                  icon: 'el-icon-data-analysis'
                 }
               }
             ]

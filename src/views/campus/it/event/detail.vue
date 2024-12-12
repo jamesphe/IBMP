@@ -1,123 +1,127 @@
 <template>
   <div class="app-container">
-    <div class="k-page-header">
-      <div class="left">
-        <div class="title">事件详情</div>
-        <div class="event-id">{{ detail.id }}</div>
+    <!-- 页面头部 -->
+    <el-card class="header-card" shadow="never">
+      <div class="header-wrapper">
+        <div class="header-left">
+          <div class="event-id">{{ mockData.eventId }}</div>
+          <el-tag
+            :type="getStatusType(mockData.status)"
+            effect="light"
+            size="medium"
+          >{{ mockData.status }}</el-tag>
+        </div>
+        <div class="header-right">
+          <el-button size="small" @click="$router.go(-1)">返回</el-button>
+          <el-button 
+            v-if="mockData.status !== '已完成'"
+            type="primary" 
+            size="small"
+            @click="handleProcess"
+          >处理事件</el-button>
+        </div>
       </div>
-      <div class="right">
-        <el-button @click="$router.go(-1)">返回</el-button>
-        <el-button type="primary" @click="handleProcess" v-if="canProcess">处理事件</el-button>
-      </div>
-    </div>
+    </el-card>
 
-    <el-row :gutter="24">
-      <!-- 左侧基本信息 -->
+    <el-row :gutter="16" style="margin-top: 16px;">
+      <!-- 左侧内容区 -->
       <el-col :span="16">
-        <el-card class="k-card" shadow="never">
-          <div slot="header" class="card-header">
-            <span>基本信息</span>
-            <el-tag :type="detail.status | statusFilter" class="status-tag">
-              {{ detail.status | statusNameFilter }}
-            </el-tag>
+        <!-- 基本信息 -->
+        <el-card class="detail-card" shadow="never">
+          <div slot="header">
+            <span class="card-title">基本信息</span>
           </div>
-          
-          <el-descriptions :column="2" border>
-            <el-descriptions-item label="事件标题">{{ detail.title }}</el-descriptions-item>
+          <el-descriptions :column="2" border size="medium">
+            <el-descriptions-item label="事件标题">{{ mockData.title }}</el-descriptions-item>
             <el-descriptions-item label="事件类型">
-              <el-tag :type="detail.type | typeFilter">
-                {{ detail.type | typeNameFilter }}
-              </el-tag>
+              <el-tag size="small">{{ mockData.type }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="优先级">
-              <el-tag :type="detail.priority | priorityFilter">
-                {{ detail.priority | priorityNameFilter }}
-              </el-tag>
+              <el-tag 
+                :type="getPriorityType(mockData.priority)"
+                size="small"
+              >{{ mockData.priority }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="影响范围">
-              <el-tag :type="detail.impact | impactFilter">
-                {{ detail.impact | impactNameFilter }}
-              </el-tag>
+              <el-tag size="small" type="warning">{{ mockData.impact }}</el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="报告人">{{ detail.reporter }}</el-descriptions-item>
-            <el-descriptions-item label="创建时间">{{ detail.createTime }}</el-descriptions-item>
+            <el-descriptions-item label="报告人">{{ mockData.reporter }}</el-descriptions-item>
+            <el-descriptions-item label="创建时间">{{ mockData.createTime }}</el-descriptions-item>
           </el-descriptions>
 
-          <div class="description-section">
-            <div class="section-title">事件描述</div>
-            <div class="description-content">{{ detail.description }}</div>
+          <div class="description-block">
+            <div class="block-title">事件描述</div>
+            <div class="block-content">{{ mockData.description }}</div>
           </div>
 
-          <div class="attachments-section" v-if="detail.attachments && detail.attachments.length > 0">
-            <div class="section-title">相关附件</div>
+          <div class="attachment-block">
+            <div class="block-title">相关附件</div>
             <div class="attachment-list">
-              <div
-                v-for="(file, index) in detail.attachments"
-                :key="index"
-                class="attachment-item"
-              >
+              <div v-for="file in mockData.attachments" :key="file.id" class="attachment-item">
                 <i class="el-icon-document" />
-                <el-link type="primary" @click="handleDownload(file)">{{ file.name }}</el-link>
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size">{{ file.size }}</span>
+                <el-button 
+                  type="text"
+                  size="small"
+                  @click="handleDownload(file)"
+                >下载</el-button>
               </div>
             </div>
           </div>
         </el-card>
 
         <!-- 处理记录 -->
-        <el-card class="k-card" shadow="never">
-          <div slot="header">处理记录</div>
+        <el-card class="detail-card" shadow="never">
+          <div slot="header">
+            <span class="card-title">处理记录</span>
+          </div>
           <el-timeline>
             <el-timeline-item
-              v-for="(record, index) in detail.records"
-              :key="index"
-              :type="record.status | timelineTypeFilter"
-              :timestamp="record.createTime"
-              placement="top"
+              v-for="record in mockData.records"
+              :key="record.id"
+              :timestamp="record.time"
+              :type="getTimelineType(record.status)"
             >
-              <div class="timeline-title">
-                <span>{{ record.handler }}</span>
-                <el-tag size="small" :type="record.status | statusFilter">
-                  {{ record.status | statusNameFilter }}
-                </el-tag>
+              <div class="timeline-header">
+                <span class="handler">{{ record.handler }}</span>
+                <el-tag 
+                  size="small"
+                  :type="getStatusType(record.status)"
+                >{{ record.status }}</el-tag>
               </div>
-              <div class="timeline-content">{{ record.comment }}</div>
-              <div class="timeline-attachments" v-if="record.attachments && record.attachments.length > 0">
-                <div
-                  v-for="(file, fileIndex) in record.attachments"
-                  :key="fileIndex"
-                  class="attachment-item"
-                >
-                  <i class="el-icon-document" />
-                  <el-link type="primary" @click="handleDownload(file)">{{ file.name }}</el-link>
-                </div>
-              </div>
+              <div class="timeline-content">{{ record.content }}</div>
             </el-timeline-item>
           </el-timeline>
         </el-card>
       </el-col>
 
-      <!-- 右侧关联信息 -->
+      <!-- 右侧内容区 -->
       <el-col :span="8">
         <!-- 关联工单 -->
-        <el-card class="k-card" shadow="never">
-          <div slot="header" class="card-header">
-            <span>关联工单</span>
-            <el-button type="text" @click="handleCreateWorkOrder" v-if="canCreateWorkOrder">
-              创建工单
-            </el-button>
+        <el-card class="detail-card" shadow="never">
+          <div slot="header" class="clearfix">
+            <span class="card-title">关联工单</span>
+            <el-button 
+              v-if="!mockData.workOrders.length"
+              type="text"
+              size="small"
+              style="float: right;"
+              @click="handleCreateWorkOrder"
+            >创建工单</el-button>
           </div>
-          
-          <div v-if="detail.workOrders && detail.workOrders.length > 0">
-            <div
-              v-for="order in detail.workOrders"
+          <div v-if="mockData.workOrders.length" class="work-order-list">
+            <div 
+              v-for="order in mockData.workOrders" 
               :key="order.id"
               class="work-order-item"
             >
               <div class="order-header">
-                <el-link type="primary" @click="handleViewWorkOrder(order)">{{ order.id }}</el-link>
-                <el-tag size="small" :type="order.status | workOrderStatusFilter">
-                  {{ order.status | workOrderStatusNameFilter }}
-                </el-tag>
+                <span class="order-id">{{ order.id }}</span>
+                <el-tag 
+                  size="small"
+                  :type="getStatusType(order.status)"
+                >{{ order.status }}</el-tag>
               </div>
               <div class="order-content">{{ order.title }}</div>
               <div class="order-footer">
@@ -127,7 +131,7 @@
             </div>
           </div>
           <div v-else class="empty-block">
-            <i class="el-icon-document" />
+            <i class="el-icon-tickets"></i>
             <span>暂无关联工单</span>
           </div>
         </el-card>
@@ -140,341 +144,368 @@
       :visible.sync="processDialogVisible"
       width="600px"
       :close-on-click-modal="false"
-      class="k-dialog"
+      custom-class="k-dialog"
     >
-      <el-form ref="processForm" :model="processForm" :rules="processRules" label-width="100px">
+      <el-form 
+        ref="processForm" 
+        :model="processForm" 
+        :rules="processRules" 
+        label-width="100px"
+        size="medium"
+      >
         <el-form-item label="处理状态" prop="status">
-          <el-select v-model="processForm.status" placeholder="请选择状态" style="width: 100%">
+          <el-select 
+            v-model="processForm.status" 
+            placeholder="请选择状态" 
+            style="width: 100%"
+          >
             <el-option
-              v-for="item in processStatusOptions"
+              v-for="item in statusOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
             >
-              <el-tag :type="item.type" size="small">{{ item.label }}</el-tag>
+              <el-tag 
+                :type="getStatusType(item.label)"
+                size="small"
+                effect="plain"
+              >{{ item.label }}</el-tag>
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="处理说明" prop="comment">
+
+        <el-form-item label="处理说明" prop="content">
           <el-input
-            v-model="processForm.comment"
+            v-model="processForm.content"
             type="textarea"
             :rows="4"
             placeholder="请输入处理说明"
+            resize="none"
           />
         </el-form-item>
+
         <el-form-item label="处理附件">
           <el-upload
-            class="k-uploader"
-            action="/dev-api/it/events/upload"
+            class="k-upload"
+            action="#"
+            :auto-upload="false"
             :file-list="processForm.fileList"
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :before-remove="beforeRemove"
-            :before-upload="beforeUpload"
+            :on-change="handleFileChange"
+            :on-remove="handleFileRemove"
             multiple
-            :limit="3"
           >
-            <el-button size="small" type="primary">点击上传</el-button>
-            <div slot="tip" class="el-upload__tip">支持格式：.jpg、.png、.pdf，单个文件不超过10MB</div>
+            <el-button size="small" type="primary" plain>
+              <i class="el-icon-upload2"></i>
+              选择文件
+            </el-button>
+            <div slot="tip" class="upload-tip">支持扩展名：.rar .zip .doc .docx .pdf .jpg...</div>
           </el-upload>
         </el-form-item>
+
+        <el-form-item label="通知相关人">
+          <el-select
+            v-model="processForm.notifyUsers"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            placeholder="请选择或输入邮箱地址"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in notifyOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+          <div class="form-tip">选择或输入需要通知的人员邮箱地址，可多选</div>
+        </el-form-item>
       </el-form>
+
       <div slot="footer" class="dialog-footer">
-        <el-button @click="processDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="submitProcess">确定</el-button>
+        <el-button @click="processDialogVisible = false">取 消</el-button>
+        <el-button 
+          type="primary" 
+          :loading="submitLoading"
+          @click="submitProcess"
+        >确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import request from '@/utils/request'
-
 export default {
   name: 'EventDetail',
-  filters: {
-    // ... 复用之前的过滤器
-    timelineTypeFilter(status) {
-      const typeMap = {
-        processing: 'warning',
-        validating: 'success',
-        completed: 'success'
-      }
-      return typeMap[status] || 'info'
-    },
-    workOrderStatusFilter(status) {
-      const statusMap = {
-        pending: 'info',
-        processing: 'warning',
-        completed: 'success'
-      }
-      return statusMap[status]
-    },
-    workOrderStatusNameFilter(status) {
-      const statusMap = {
-        pending: '待处理',
-        processing: '处理中',
-        completed: '已完成'
-      }
-      return statusMap[status]
-    }
-  },
   data() {
     return {
-      detail: {},
+      // 模拟数据
+      mockData: {
+        eventId: 'EV20240301001',
+        title: '服务器CPU使用率过高',
+        type: '硬件故障',
+        priority: '高',
+        status: '处理中',
+        impact: '部门级',
+        reporter: '张三',
+        createTime: '2024-03-01 10:30:00',
+        description: '生产环境主服务器CPU使用率持续超过90%，影响系统响应速度。初步排查为数据库查询导致CPU占用过高。',
+        attachments: [
+          { id: 1, name: 'CPU使用率监控截图.png', size: '1.2MB' },
+          { id: 2, name: '问题分析报告.pdf', size: '526KB' }
+        ],
+        records: [
+          {
+            id: 1,
+            handler: '李四',
+            status: '处理中',
+            time: '2024-03-01 11:00:00',
+            content: '已收到报警，正在分析CPU使用率过高原因'
+          },
+          {
+            id: 2,
+            handler: '李四',
+            status: '处理中',
+            time: '2024-03-01 11:30:00',
+            content: '定位到问题原因：数据库慢查询导致CPU使用率升高，正在优化SQL语句'
+          }
+        ],
+        workOrders: [
+          {
+            id: 'WO20240301001',
+            title: 'CPU使用率优化工单',
+            status: '处理中',
+            handler: '李四',
+            createTime: '2024-03-01 11:05:00'
+          }
+        ]
+      },
+      // 处理对话框
       processDialogVisible: false,
-      submitLoading: false,
       processForm: {
         status: '',
-        comment: '',
-        fileList: []
+        content: '',
+        fileList: [],
+        notifyUsers: []
       },
       processRules: {
         status: [{ required: true, message: '请选择处理状态', trigger: 'change' }],
-        comment: [{ required: true, message: '请输入处理说明', trigger: 'blur' }]
+        content: [
+          { required: true, message: '请输入处理说明', trigger: 'blur' },
+          { min: 10, message: '处理说明不能少于10个字符', trigger: 'blur' }
+        ]
       },
-      processStatusOptions: [
-        { label: '处理中', value: 'processing', type: 'warning' },
-        { label: '待验证', value: 'validating', type: 'success' },
-        { label: '已完成', value: 'completed', type: '' }
-      ]
+      statusOptions: [
+        { value: 'processing', label: '处理中' },
+        { value: 'validating', label: '待验证' },
+        { value: 'completed', label: '已完成' }
+      ],
+      notifyOptions: [
+        { value: 'zhangsan@example.com', label: '张三' },
+        { value: 'lisi@example.com', label: '李四' },
+        { value: 'wangwu@example.com', label: '王五' }
+      ],
+      submitLoading: false
     }
-  },
-  computed: {
-    canProcess() {
-      return ['pending', 'processing'].includes(this.detail.status)
-    },
-    canCreateWorkOrder() {
-      return !this.detail.workOrders?.length
-    }
-  },
-  created() {
-    this.getDetail()
   },
   methods: {
-    async getDetail() {
-      try {
-        const { data } = await request({
-          url: `/dev-api/it/events/${this.$route.params.id}`,
-          method: 'get'
-        })
-        this.detail = data
-      } catch (error) {
-        console.error('获取事件详情失败:', error)
+    getPriorityType(priority) {
+      const types = {
+        高: 'danger',
+        中: 'warning',
+        低: 'info'
       }
+      return types[priority] || 'info'
+    },
+    getStatusType(status) {
+      const types = {
+        待处理: 'info',
+        处理中: 'warning',
+        已完成: 'success',
+        已关闭: ''
+      }
+      return types[status] || 'info'
+    },
+    getTimelineType(status) {
+      const types = {
+        处理中: 'warning',
+        已完成: 'success'
+      }
+      return types[status] || 'info'
     },
     handleProcess() {
-      this.processForm = {
-        status: '',
-        comment: '',
-        fileList: []
-      }
       this.processDialogVisible = true
     },
-    async submitProcess() {
-      this.$refs.processForm.validate(async valid => {
+    handleCreateWorkOrder() {
+      this.$message.success('跳转到工单创建页面')
+    },
+    handleDownload(file) {
+      this.$message.success(`下载文件：${file.name}`)
+    },
+    handleFileChange(file, fileList) {
+      this.processForm.fileList = fileList
+    },
+    handleFileRemove(file, fileList) {
+      this.processForm.fileList = fileList
+    },
+    submitProcess() {
+      this.$refs.processForm.validate(valid => {
         if (valid) {
           this.submitLoading = true
-          try {
-            await request({
-              url: `/dev-api/it/events/${this.detail.id}/process`,
-              method: 'post',
-              data: this.processForm
-            })
-
-            this.processDialogVisible = false
+          // 模拟提交
+          setTimeout(() => {
+            this.submitLoading = false
             this.$notify({
               title: '成功',
-              message: '处理成功',
+              message: '事件处理成功',
               type: 'success',
               duration: 2000
             })
-            this.getDetail()
-          } catch (error) {
-            this.$notify({
-              title: '错误',
-              message: '处理失败',
-              type: 'error',
-              duration: 2000
-            })
-          } finally {
-            this.submitLoading = false
-          }
+            this.processDialogVisible = false
+          }, 1000)
         }
       })
-    },
-    handleCreateWorkOrder() {
-      this.$router.push({
-        name: 'WorkOrderCreate',
-        query: { eventId: this.detail.id }
-      })
-    },
-    handleViewWorkOrder(order) {
-      this.$router.push({
-        name: 'WorkOrderDetail',
-        params: { id: order.id }
-      })
-    },
-    handleDownload(file) {
-      window.open(file.url)
-    },
-    // ... 复用之前的上传相关方法
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/variables.scss';
+.header-card {
+  .header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-.k-page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding: 24px;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-
-  .left {
-    .title {
-      font-size: 20px;
-      font-weight: 500;
-      color: $heading-color;
-      margin-bottom: 8px;
-    }
-
-    .event-id {
-      font-size: 14px;
-      color: $text-secondary;
-    }
-  }
-
-  .right {
-    .el-button + .el-button {
-      margin-left: 12px;
+    .header-left {
+      display: flex;
+      align-items: center;
+      
+      .event-id {
+        font-size: 16px;
+        font-weight: 500;
+        margin-right: 16px;
+      }
     }
   }
 }
 
-.k-card {
-  margin-bottom: 24px;
+.detail-card {
+  margin-bottom: 16px;
 
   &:last-child {
     margin-bottom: 0;
   }
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .status-tag {
-      margin-left: 12px;
-    }
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2d3d;
   }
 
-  .description-section,
-  .attachments-section {
+  .description-block,
+  .attachment-block {
     margin-top: 24px;
 
-    .section-title {
+    .block-title {
       font-size: 14px;
       font-weight: 500;
-      color: $heading-color;
       margin-bottom: 16px;
     }
-  }
 
-  .description-content {
-    color: $text-regular;
-    line-height: 1.6;
-    white-space: pre-wrap;
+    .block-content {
+      line-height: 1.6;
+      color: #606266;
+    }
   }
 
   .attachment-list {
     .attachment-item {
       display: flex;
       align-items: center;
-      margin-bottom: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #ebeef5;
 
       &:last-child {
-        margin-bottom: 0;
+        border-bottom: none;
       }
 
       i {
+        color: #909399;
         margin-right: 8px;
-        color: $text-secondary;
+      }
+
+      .file-name {
+        flex: 1;
+        margin-right: 16px;
+      }
+
+      .file-size {
+        color: #909399;
+        margin-right: 16px;
       }
     }
   }
 
-  .timeline-title {
+  .timeline-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+
+    .handler {
+      font-weight: 500;
+    }
   }
 
   .timeline-content {
-    color: $text-regular;
+    color: #606266;
     line-height: 1.6;
-    margin-bottom: 8px;
   }
 
-  .timeline-attachments {
-    .attachment-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 4px;
+  .work-order-list {
+    .work-order-item {
+      padding: 16px;
+      border-bottom: 1px solid #ebeef5;
 
       &:last-child {
-        margin-bottom: 0;
+        border-bottom: none;
       }
 
-      i {
-        margin-right: 8px;
-        color: $text-secondary;
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .order-id {
+          color: #409EFF;
+          font-weight: 500;
+        }
       }
-    }
-  }
 
-  .work-order-item {
-    padding: 16px;
-    border-bottom: 1px solid $border-color-light;
+      .order-content {
+        color: #606266;
+        margin-bottom: 8px;
+      }
 
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .order-content {
-      color: $text-regular;
-      margin-bottom: 8px;
-    }
-
-    .order-footer {
-      display: flex;
-      justify-content: space-between;
-      color: $text-secondary;
-      font-size: 12px;
+      .order-footer {
+        display: flex;
+        justify-content: space-between;
+        color: #909399;
+        font-size: 12px;
+      }
     }
   }
 
   .empty-block {
     padding: 32px 0;
     text-align: center;
-    color: $text-secondary;
+    color: #909399;
 
     i {
-      font-size: 24px;
+      font-size: 32px;
       margin-bottom: 8px;
     }
 
@@ -484,20 +515,78 @@ export default {
   }
 }
 
-.k-dialog {
-  :deep(.el-dialog__body) {
-    padding: 24px 32px;
+::v-deep {
+  .el-card__header {
+    padding: 16px;
+    border-bottom: 1px solid #ebeef5;
   }
 
-  .k-uploader {
-    :deep(.el-upload-list) {
-      margin-top: 8px;
+  .el-card__body {
+    padding: 16px;
+  }
+
+  .el-descriptions {
+    margin-bottom: 0;
+  }
+
+  .el-timeline-item__node {
+    width: 12px;
+    height: 12px;
+  }
+
+  .el-timeline-item__tail {
+    left: 5px;
+  }
+}
+
+.k-dialog {
+  ::v-deep {
+    .el-dialog__header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #ebeef5;
+      margin: 0;
+
+      .el-dialog__title {
+        font-size: 16px;
+        font-weight: 500;
+        color: #1f2d3d;
+      }
     }
 
-    :deep(.el-upload__tip) {
-      margin-top: 8px;
-      color: $text-secondary;
+    .el-dialog__body {
+      padding: 24px;
     }
+
+    .el-dialog__footer {
+      padding: 16px 24px;
+      border-top: 1px solid #ebeef5;
+    }
+
+    .el-form-item__label {
+      font-weight: normal;
+      color: #606266;
+    }
+
+    .el-textarea__inner {
+      padding: 8px 12px;
+      line-height: 1.6;
+    }
+  }
+
+  .k-upload {
+    ::v-deep {
+      .el-upload-list {
+        margin-top: 8px;
+      }
+    }
+  }
+
+  .upload-tip,
+  .form-tip {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #909399;
+    line-height: 1.4;
   }
 }
 </style> 
