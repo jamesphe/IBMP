@@ -475,6 +475,45 @@ export const asyncRoutes = [
               title: '备份恢复管理',
               icon: 'el-icon-refresh'
             }
+          },
+          {
+            path: 'settings',
+            component: () => import('@/views/campus/it/settings/index'),
+            name: 'ITSettings',
+            meta: {
+              title: '基础设置',
+              icon: 'el-icon-setting',
+              roles: ['admin']
+            },
+            children: [
+              {
+                path: 'event-type',
+                component: () => import('@/views/campus/it/settings/event-type'),
+                name: 'EventType',
+                meta: {
+                  title: '事件类型',
+                  icon: 'el-icon-collection-tag'
+                }
+              },
+              {
+                path: 'priority',
+                component: () => import('@/views/campus/it/settings/priority'),
+                name: 'Priority',
+                meta: {
+                  title: '优先级定义',
+                  icon: 'el-icon-top'
+                }
+              },
+              {
+                path: 'status',
+                component: () => import('@/views/campus/it/settings/status'),
+                name: 'Status',
+                meta: {
+                  title: '状态定义',
+                  icon: 'el-icon-finished'
+                }
+              }
+            ]
           }
         ]
       },
