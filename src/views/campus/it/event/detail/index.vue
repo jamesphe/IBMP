@@ -8,6 +8,22 @@
       <div class="header-right">
         <el-button-group class="action-group">
           <el-button 
+            type="success" 
+            icon="el-icon-check"
+            v-if="checkPermission(['user']) && eventDetail.status === '已解决'"
+            @click="handleConfirm"
+          >
+            确认处理结果
+          </el-button>
+          <el-button 
+            type="primary" 
+            icon="el-icon-view"
+            v-if="checkPermission(['admin'])"
+            @click="handleReview"
+          >
+            复核事件
+          </el-button>
+          <el-button 
             type="warning" 
             icon="el-icon-top"
             v-if="checkPermission(['admin', 'handler']) && eventDetail.status !== '已完成'"
@@ -32,14 +48,6 @@
             添加协作
           </el-button>
         </el-button-group>
-        <el-button 
-          type="primary" 
-          icon="el-icon-edit"
-          v-if="checkPermission(['admin', 'handler'])"
-          @click="handleEdit"
-        >
-          编辑事件
-        </el-button>
       </div>
     </div>
 
@@ -51,7 +59,9 @@
       <el-steps :active="getStatusStep()" finish-status="success" align-center>
         <el-step title="已提交" :description="getStepTime('提交事件')" />
         <el-step title="处理中" :description="getStepTime('开始处理')" />
-        <el-step title="已完成" :description="getStepTime('处理完成')" />
+        <el-step title="已解决" :description="getStepTime('处理完成')" />
+        <el-step title="已确认" :description="getStepTime('用户确认')" />
+        <el-step title="已关闭" :description="getStepTime('事件关闭')" />
       </el-steps>
     </el-card>
 
@@ -72,6 +82,12 @@
             effect="dark" 
             size="small"
           >协作处理</el-tag>
+          <el-tag 
+            v-if="eventDetail.reviewStatus"
+            type="info" 
+            effect="dark" 
+            size="small"
+          >已复核</el-tag>
         </div>
       </div>
       
@@ -129,6 +145,18 @@
             </div>
           </el-col>
         </el-row>
+        <el-row v-if="eventDetail.reviewStatus" style="margin-top: 20px">
+          <el-col :span="24">
+            <div class="info-item">
+              <span class="info-label">复核信息：</span>
+              <div class="review-info">
+                <div>复核人：{{ eventDetail.reviewer }}</div>
+                <div>复核时间：{{ eventDetail.reviewTime | parseTime('{y}-{m}-{d} {h}:{i}') }}</div>
+                <div>复核意见：{{ eventDetail.reviewComment }}</div>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
       </div>
     </el-card>
 
@@ -176,7 +204,7 @@
         <span class="card-title">处理记录</span>
         <div class="header-actions" v-if="checkPermission(['admin', 'handler'])">
           <el-button type="primary" plain size="small" icon="el-icon-plus" @click="handleAddRecord">
-            ���加记录
+            添加记录
           </el-button>
         </div>
       </div>
@@ -226,7 +254,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="处理说明" prop="content" required>
+        <el-form-item label="��理说明" prop="content" required>
           <el-input
             type="textarea"
             v-model="recordForm.content"
@@ -352,6 +380,69 @@
         <el-button type="success" @click="submitCollaborate">确认添加</el-button>
       </div>
     </el-dialog>
+
+    <!-- 添加确认对话框 -->
+    <el-dialog
+      title="确认处理结果"
+      :visible.sync="confirmDialogVisible"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form ref="confirmForm" :model="confirmForm" :rules="confirmRules" label-width="100px">
+        <el-form-item label="处理评价" prop="rating" required>
+          <el-rate
+            v-model="confirmForm.rating"
+            :texts="['很差', '较差', '一般', '较好', '很好']"
+            show-text
+          />
+        </el-form-item>
+        <el-form-item label="确认说明" prop="comment">
+          <el-input
+            type="textarea"
+            v-model="confirmForm.comment"
+            :rows="4"
+            placeholder="请对处理结果进行评价(选填)"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="confirmDialogVisible = false">取 消</el-button>
+        <el-button type="success" @click="submitConfirm">确认完成</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 添加复核对话框 -->
+    <el-dialog
+      title="事件复核"
+      :visible.sync="reviewDialogVisible"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form ref="reviewForm" :model="reviewForm" :rules="reviewRules" label-width="100px">
+        <el-form-item label="复核结果" prop="result" required>
+          <el-radio-group v-model="reviewForm.result">
+            <el-radio label="pass">通过</el-radio>
+            <el-radio label="reject">不通过</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="复核意见" prop="comment" required>
+          <el-input
+            type="textarea"
+            v-model="reviewForm.comment"
+            :rows="4"
+            placeholder="请输入复核意见"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="reviewDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitReview">提交复核</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -400,7 +491,7 @@ const mockEventDetail = {
 // 处理动作选项
 const actionOptions = [
   { value: '开始处理', label: '开始处理', desc: '接手处理事件' },
-  { value: '处理中', label: '处理中', desc: '记录处理进展' },
+  { value: '处理中', label: '处理中', desc: '记��处理进展' },
   { value: '转交处理', label: '转交处理', desc: '转交给其他人处理' },
   { value: '处理完成', label: '处理完成', desc: '事件处理完成' }
 ]
@@ -444,7 +535,7 @@ export default {
       },
       recordRules: {
         action: [{ required: true, message: '请选择处理动作', trigger: 'change' }],
-        content: [{ required: true, message: '请输入处理说明', trigger: 'blur' }]
+        content: [{ required: true, message: '��输入处理说明', trigger: 'blur' }]
       },
       actionOptions,
       escalateForm: {
@@ -470,6 +561,23 @@ export default {
       collaborateRules: {
         collaborators: [{ required: true, message: '请选择协作人员', trigger: 'change' }],
         reason: [{ required: true, message: '请输入协作说明', trigger: 'blur' }]
+      },
+      confirmDialogVisible: false,
+      confirmForm: {
+        rating: 3,
+        comment: ''
+      },
+      confirmRules: {
+        rating: [{ required: true, message: '请对处理结果进行评价', trigger: 'change' }]
+      },
+      reviewDialogVisible: false,
+      reviewForm: {
+        result: 'pass',
+        comment: ''
+      },
+      reviewRules: {
+        result: [{ required: true, message: '请选择复核结果', trigger: 'change' }],
+        comment: [{ required: true, message: '请输入复核意见', trigger: 'blur' }]
       }
     }
   },
@@ -496,7 +604,13 @@ export default {
   methods: {
     checkPermission,
     handleEdit() {
-      this.$router.push(`/campus/it/event/edit/${this.eventDetail.id}`)
+      this.$router.push({
+        path: '/campus/it/event/search',
+        query: {
+          id: this.eventDetail.id,
+          type: 'edit'
+        }
+      })
     },
     handleAddRecord() {
       this.dialogVisible = true
@@ -540,7 +654,9 @@ export default {
       const statusMap = {
         '待处理': 0,
         '处理中': 1,
-        '已完成': 2
+        '已解决': 2,
+        '已确认': 3,
+        '已关闭': 4
       }
       return statusMap[this.eventDetail.status] || 0
     },
@@ -644,6 +760,57 @@ export default {
             type: 'success',
             message: '已添加协作人员'
           })
+        }
+      })
+    },
+    handleConfirm() {
+      this.confirmDialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.confirmForm.clearValidate()
+      })
+    },
+    submitConfirm() {
+      this.$refs.confirmForm.validate(valid => {
+        if (valid) {
+          // 添加确认记录
+          const record = {
+            time: new Date().toISOString(),
+            operator: this.eventDetail.creator,
+            action: '用户确认',
+            content: `处理评价：${this.confirmForm.rating}星\n确认说明：${this.confirmForm.comment || '无'}`,
+            type: 'success'
+          }
+          this.eventDetail.records.push(record)
+          this.eventDetail.status = '已关闭'
+          this.confirmDialogVisible = false
+          this.$message.success('已确认处理结果')
+        }
+      })
+    },
+    handleReview() {
+      this.reviewDialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.reviewForm.clearValidate()
+      })
+    },
+    submitReview() {
+      this.$refs.reviewForm.validate(valid => {
+        if (valid) {
+          // 添加复核记录
+          const record = {
+            time: new Date().toISOString(),
+            operator: '管理员',
+            action: '事件复核',
+            content: `复核结果：${this.reviewForm.result === 'pass' ? '通过' : '不通过'}\n复核意见：${this.reviewForm.comment}`,
+            type: this.reviewForm.result === 'pass' ? 'success' : 'warning'
+          }
+          this.eventDetail.records.push(record)
+          this.eventDetail.reviewStatus = true
+          this.eventDetail.reviewer = '管理员'
+          this.eventDetail.reviewTime = new Date().toISOString()
+          this.eventDetail.reviewComment = this.reviewForm.comment
+          this.reviewDialogVisible = false
+          this.$message.success('复核完成')
         }
       })
     }

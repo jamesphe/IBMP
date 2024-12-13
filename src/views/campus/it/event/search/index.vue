@@ -53,7 +53,7 @@
           <span class="event-id">{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="事件标题" prop="title" min-width="200" show-overflow-tooltip />
+      <el-table-column label="事��标题" prop="title" min-width="200" show-overflow-tooltip />
       <el-table-column label="优先级" width="100" align="center">
         <template slot-scope="{row}">
           <el-tag :type="row.priority | priorityFilter">{{ row.priority }}</el-tag>
@@ -77,13 +77,29 @@
           <span>{{ row.createTime | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="280" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)" v-if="checkPermission(['admin', 'handler'])">
             编辑
           </el-button>
           <el-button size="mini" @click="handleDetail(row)">
             详情
+          </el-button>
+          <el-button 
+            type="warning" 
+            size="mini" 
+            @click="handleEscalate(row)"
+            v-if="checkPermission(['admin', 'handler']) && row.status !== '已完成'"
+          >
+            升级
+          </el-button>
+          <el-button
+            type="info"
+            size="mini"
+            @click="handleCollaborate(row)"
+            v-if="checkPermission(['admin', 'handler']) && row.status === '处理中'"
+          >
+            协作
           </el-button>
         </template>
       </el-table-column>
@@ -223,7 +239,7 @@
           </el-row>
         </div>
 
-        <!-- 编辑时显示提交信息 -->
+        <!-- 编辑时示提交信息 -->
         <div class="form-section" v-if="dialogType==='update'">
           <div class="section-header">
             <span class="section-title">提交信息</span>
@@ -264,6 +280,79 @@
         <el-button type="primary" @click="dialogType==='create'?createData():updateData()">
           {{ dialogType==='create'?'提 交':'保 存' }}
         </el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+      title="事件升级"
+      :visible.sync="escalateDialogVisible"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form ref="escalateForm" :model="escalateForm" :rules="escalateRules" label-width="100px">
+        <el-form-item label="升级原因" prop="reason" required>
+          <el-input
+            type="textarea"
+            v-model="escalateForm.reason"
+            :rows="4"
+            placeholder="请说明事件升级的原因"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+        <el-form-item label="升级处理人" prop="handler" required>
+          <el-select v-model="escalateForm.handler" placeholder="请选择升级后的处理人" style="width: 100%">
+            <el-option
+              v-for="item in seniorHandlers"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="escalateDialogVisible = false">取 消</el-button>
+        <el-button type="warning" @click="confirmEscalate">确认升级</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+      title="添加协作人员"
+      :visible.sync="collaborateDialogVisible"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form ref="collaborateForm" :model="collaborateForm" :rules="collaborateRules" label-width="100px">
+        <el-form-item label="协作人员" prop="collaborators" required>
+          <el-select
+            v-model="collaborateForm.collaborators"
+            multiple
+            placeholder="请选择协作人员"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="item in handlerOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="协作说明" prop="reason" required>
+          <el-input
+            type="textarea"
+            v-model="collaborateForm.reason"
+            :rows="4"
+            placeholder="请说明需要协作的内容"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="collaborateDialogVisible = false">取 消</el-button>
+        <el-button type="success" @click="confirmCollaborate">确认添加</el-button>
       </div>
     </el-dialog>
   </div>
@@ -341,7 +430,7 @@ const mockList = [
     title: '教室空调不制冷',
     description: 'A305教室空调运行异常,影响上课',
     priority: '中',
-    status: '待处���',
+    status: '待处理',
     handler: '',
     createTime: '2024-03-02 08:30:00',
     creator: '李主任',
@@ -358,7 +447,7 @@ const mockHandlers = [
   { label: '李工', value: '李工' }
 ]
 
-// 添加身份选项
+// 加身份选项
 const roleOptions = [
   { label: '教师', value: '教师' },
   { label: '学生', value: '学生' },
@@ -405,7 +494,7 @@ const deptOptions = [
   }
 ]
 
-// 修改过滤器和选项
+// 修改过滤器和选择器
 export default {
   name: 'EventSearch',
   components: {
@@ -449,7 +538,7 @@ export default {
       },
       statusOptions: [
         { label: '待处理', value: '待处理' },
-        { label: '���理中', value: '处理中' },
+        { label: '处理中', value: '处理中' },
         { label: '已完成', value: '已完成' },
         { label: '已关闭', value: '已关闭' }
       ],
@@ -480,11 +569,42 @@ export default {
         creatorDept: [{ required: true, message: '请选择所属部门', trigger: 'change' }]
       },
       roleOptions,
-      deptOptions
+      deptOptions,
+      escalateDialogVisible: false,
+      escalateForm: {
+        reason: '',
+        handler: ''
+      },
+      escalateRules: {
+        reason: [{ required: true, message: '请输入升级原因', trigger: 'blur' }],
+        handler: [{ required: true, message: '请选择升级处理人', trigger: 'change' }]
+      },
+      seniorHandlers: [
+        { label: '张主管', value: '张主管' },
+        { label: '王经理', value: '王经理' },
+        { label: '李总监', value: '李总监' }
+      ],
+      collaborateDialogVisible: false,
+      collaborateForm: {
+        collaborators: [],
+        reason: ''
+      },
+      collaborateRules: {
+        collaborators: [{ required: true, message: '请选择协作人员', trigger: 'change' }],
+        reason: [{ required: true, message: '请输入协作说明', trigger: 'blur' }]
+      }
     }
   },
   created() {
     this.getList()
+    // 处理从详情页跳转过来的编辑请求
+    const { id, type } = this.$route.query
+    if (id && type === 'edit') {
+      const row = mockList.find(item => item.id === id)
+      if (row) {
+        this.handleUpdate(row)
+      }
+    }
   },
   methods: {
     checkPermission,
@@ -643,6 +763,49 @@ export default {
         '低': '不影响正常工作的小问题'
       }
       return descMap[priority]
+    },
+    handleEscalate(row) {
+      this.escalateDialogVisible = true
+      this.currentRow = row
+      this.$nextTick(() => {
+        this.$refs.escalateForm.clearValidate()
+      })
+    },
+    confirmEscalate() {
+      this.$refs.escalateForm.validate(valid => {
+        if (valid) {
+          // TODO: 调用升级API
+          const row = this.currentRow
+          row.status = '已升级'
+          row.handler = this.escalateForm.handler
+          this.$message.success('事件已升级')
+          this.escalateDialogVisible = false
+          this.getList()
+        }
+      })
+    },
+    handleCollaborate(row) {
+      this.collaborateDialogVisible = true
+      this.currentRow = row
+      this.$nextTick(() => {
+        this.$refs.collaborateForm.clearValidate()
+      })
+    },
+    confirmCollaborate() {
+      this.$refs.collaborateForm.validate(valid => {
+        if (valid) {
+          // TODO: 调用协作API
+          const row = this.currentRow
+          row.collaborators = this.collaborateForm.collaborators.map(name => ({
+            id: Date.now(),
+            name,
+            role: '协作处理'
+          }))
+          this.$message.success('已添加协作人员')
+          this.collaborateDialogVisible = false
+          this.getList()
+        }
+      })
     }
   }
 }
