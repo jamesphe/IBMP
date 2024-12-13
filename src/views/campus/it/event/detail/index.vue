@@ -176,7 +176,7 @@
         <span class="card-title">处理记录</span>
         <div class="header-actions" v-if="checkPermission(['admin', 'handler'])">
           <el-button type="primary" plain size="small" icon="el-icon-plus" @click="handleAddRecord">
-            添加记录
+            ���加记录
           </el-button>
         </div>
       </div>

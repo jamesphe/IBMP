@@ -256,6 +256,26 @@ export const asyncRoutes = [
                 }
               },
               {
+                path: 'dispatch',
+                component: () => import('@/views/campus/it/event/dispatch/index'),
+                name: 'EventDispatch',
+                meta: {
+                  title: '事件调度',
+                  icon: 'el-icon-share',
+                  roles: ['admin', 'dispatcher']
+                }
+              },
+              {
+                path: 'report',
+                component: () => import('@/views/campus/it/event/report/index'),
+                name: 'EventReport',
+                meta: {
+                  title: '事件报表',
+                  icon: 'el-icon-data-analysis',
+                  roles: ['admin', 'manager']
+                }
+              },
+              {
                 path: 'detail/:id',
                 component: () => import('@/views/campus/it/event/detail/index'),
                 name: 'EventDetail',

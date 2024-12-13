@@ -278,7 +278,7 @@ import Pagination from '@/components/Pagination'
 const mockList = [
   {
     id: 'EV2024030001',
-    title: '教务��统无法登录',
+    title: '教务系统无法登录',
     description: '信息系教师反映无法登录教务系统,影响正常教学',
     priority: '紧急',
     status: '待处理',
