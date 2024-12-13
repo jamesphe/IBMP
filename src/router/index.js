@@ -219,7 +219,7 @@ export const asyncRoutes = [
         path: 'it',
         component: () => import('@/views/campus/it/index'),
         name: 'IT',
-        redirect: '/campus/it/index',
+        redirect: '/campus/it/event/search',
         meta: {
           title: 'IT运维管理系统',
           icon: 'el-icon-monitor'
@@ -243,64 +243,26 @@ export const asyncRoutes = [
               title: '事件管理',
               icon: 'el-icon-warning'
             },
+            redirect: '/campus/it/event/search',
             children: [
               {
-                path: 'register',
-                component: () => import('@/views/campus/it/event/register'),
-                name: 'EventRegister',
+                path: 'search',
+                component: () => import('@/views/campus/it/event/search/index'),
+                name: 'EventSearch',
                 meta: {
-                  title: '事件登记',
-                  icon: 'el-icon-plus',
-                  roles: ['admin', 'registrar']
-                }
-              },
-              {
-                path: 'process',
-                component: () => import('@/views/campus/it/event/process'),
-                name: 'EventProcess',
-                meta: {
-                  title: '事件处理',
-                  icon: 'el-icon-s-operation',
-                  roles: ['admin', 'handler']
-                }
-              },
-              {
-                path: 'history',
-                component: () => import('@/views/campus/it/event/history'),
-                name: 'EventHistory',
-                meta: {
-                  title: '历史查询',
-                  icon: 'el-icon-time',
+                  title: '事件查询',
+                  icon: 'el-icon-search',
                   roles: ['admin', 'handler', 'registrar']
                 }
               },
               {
-                path: 'statistics',
-                component: () => import('@/views/campus/it/event/statistics'),
-                name: 'EventStatistics',
-                meta: {
-                  title: '事件统计',
-                  icon: 'el-icon-data-line',
-                  roles: ['admin']
-                }
-              },
-              {
-                path: 'category',
-                component: () => import('@/views/campus/it/event/category'),
-                name: 'EventCategory',
-                meta: {
-                  title: '分类管理',
-                  icon: 'el-icon-collection-tag',
-                  roles: ['admin']
-                }
-              },
-              {
                 path: 'detail/:id',
-                component: () => import('@/views/campus/it/event/detail'),
+                component: () => import('@/views/campus/it/event/detail/index'),
                 name: 'EventDetail',
                 meta: {
                   title: '事件详情',
-                  noCache: true
+                  noCache: true,
+                  activeMenu: '/campus/it/event/search'
                 },
                 hidden: true
               }
@@ -412,33 +374,69 @@ export const asyncRoutes = [
             ]
           },
           {
-            path: 'device',
-            component: () => import('@/views/campus/it/device/index'),
-            name: 'Device',
+            path: 'loan',
+            component: () => import('@/views/campus/it/device/loan'),
+            name: 'DeviceLoan',
             meta: {
-              title: '资产与设备',
-              icon: 'el-icon-monitor'
+              title: '设备借用管理',
+              icon: 'el-icon-connection'
             },
             children: [
               {
-                path: 'loan',
-                component: () => import('@/views/campus/it/device/loan'),
-                name: 'DeviceLoan',
+                path: 'apply',
+                component: () => import('@/views/campus/it/device/loan/apply'),
+                name: 'DeviceLoanApply',
                 meta: {
-                  title: '设备借用管理',
-                  icon: 'el-icon-connection'
+                  title: '借用申请',
+                  icon: 'el-icon-plus'
                 }
               },
               {
-                path: 'asset',
-                component: () => import('@/views/campus/it/device/asset'),
-                name: 'AssetManagement',
+                path: 'tracking',
+                component: () => import('@/views/campus/it/device/loan/tracking'),
+                name: 'DeviceLoanTracking',
                 meta: {
-                  title: '资产专项管理',
+                  title: '申请跟踪',
+                  icon: 'el-icon-view'
+                }
+              },
+              {
+                path: 'records',
+                component: () => import('@/views/campus/it/device/loan/records'),
+                name: 'DeviceLoanRecords',
+                meta: {
+                  title: '借用记录',
+                  icon: 'el-icon-document'
+                }
+              },
+              {
+                path: 'receive',
+                component: () => import('@/views/campus/it/device/loan/receive'),
+                name: 'DeviceLoanReceive',
+                meta: {
+                  title: '设备领用',
                   icon: 'el-icon-box'
+                }
+              },
+              {
+                path: 'return',
+                component: () => import('@/views/campus/it/device/loan/return'),
+                name: 'DeviceLoanReturn',
+                meta: {
+                  title: '设备归还',
+                  icon: 'el-icon-refresh-left'
                 }
               }
             ]
+          },
+          {
+            path: 'asset',
+            component: () => import('@/views/campus/it/device/asset'),
+            name: 'AssetManagement',
+            meta: {
+              title: '资产专项管理',
+              icon: 'el-icon-box'
+            }
           },
           {
             path: 'config',
