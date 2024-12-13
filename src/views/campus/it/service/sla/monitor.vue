@@ -193,7 +193,7 @@ export default {
           unit: '%',
           trend: -0.3,
           threshold: 90,
-          tooltip: '服���解决时间达标率'
+          tooltip: '服务解决时间达标率'
         },
         {
           title: '客户满意度',

@@ -64,7 +64,7 @@
                     </div>
                     <div class="data-item">
                       <p>教学设备台账</p>
-                      <p>设备���类管理</p>
+                      <p>设备分类管理</p>
                     </div>
                   </el-card>
                 </el-col>

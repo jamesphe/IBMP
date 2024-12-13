@@ -26,7 +26,7 @@
         <template slot-scope="{row}">{{ row.responseTime }}分钟</template>
       </el-table-column>
       <el-table-column prop="resolveTime" label="解决时间" width="120" align="center">
-        <template slot-scope="{row}">{{ row.resolveTime }}��时</template>
+        <template slot-scope="{row}">{{ row.resolveTime }}小时</template>
       </el-table-column>
       <el-table-column prop="availability" label="可用性" width="120" align="center">
         <template slot-scope="{row}">{{ row.availability }}%</template>

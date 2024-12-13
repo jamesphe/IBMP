@@ -19,6 +19,9 @@
       <el-select v-model="listQuery.status" placeholder="事件状态" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
+      <el-select v-model="listQuery.eventType" placeholder="事件类型" clearable class="filter-item" style="width: 130px">
+        <el-option v-for="item in eventTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
       <el-select v-model="listQuery.priority" placeholder="优先级" clearable class="filter-item" style="width: 130px">
         <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
@@ -53,7 +56,12 @@
           <span class="event-id">{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="事��标题" prop="title" min-width="200" show-overflow-tooltip />
+      <el-table-column label="事件标题" prop="title" min-width="200" show-overflow-tooltip />
+      <el-table-column label="事件类型" width="120" align="center">
+        <template slot-scope="{row}">
+          <el-tag size="medium">{{ row.eventType }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="优先级" width="100" align="center">
         <template slot-scope="{row}">
           <el-tag :type="row.priority | priorityFilter">{{ row.priority }}</el-tag>
@@ -273,6 +281,17 @@
             </el-col>
           </el-row>
         </div>
+
+        <el-form-item label="事件类型" prop="eventType" required>
+          <el-select v-model="temp.eventType" placeholder="请选择事件类型" class="full-width">
+            <el-option
+              v-for="item in eventTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
@@ -369,6 +388,7 @@ const mockList = [
     id: 'EV2024030001',
     title: '教务系统无法登录',
     description: '信息系教师反映无法登录教务系统,影响正常教学',
+    eventType: '系统故障',
     priority: '紧急',
     status: '待处理',
     handler: '张工',
@@ -381,6 +401,7 @@ const mockList = [
     id: 'EV2024030002',
     title: '多媒体教室投影仪故障',
     description: '综合楼B403教室投影仪无法显示,需要紧急处理',
+    eventType: '硬件故障',
     priority: '高',
     status: '处理中',
     handler: '王工',
@@ -393,6 +414,7 @@ const mockList = [
     id: 'EV2024030003',
     title: '图书馆网络故障',
     description: '图书馆三楼阅览室网络无法访问,影响学生查阅资料',
+    eventType: '网络故障',
     priority: '高',
     status: '已完成',
     handler: '刘工',
@@ -405,6 +427,7 @@ const mockList = [
     id: 'EV2024030004',
     title: '机房电脑蓝屏',
     description: '计算机系机房B205有多台电脑出现蓝屏现象',
+    eventType: '硬件故障',
     priority: '中',
     status: '处理中',
     handler: '李工',
@@ -417,6 +440,7 @@ const mockList = [
     id: 'EV2024030005',
     title: '打印机卡纸',
     description: '行政楼203办公打印机卡纸,需要处理',
+    eventType: '硬件故障',
     priority: '低',
     status: '已完成',
     handler: '张工',
@@ -429,6 +453,7 @@ const mockList = [
     id: 'EV2024030006',
     title: '教室空调不制冷',
     description: 'A305教室空调运行异常,影响上课',
+    eventType: '硬件故障',
     priority: '中',
     status: '待处理',
     handler: '',
@@ -534,7 +559,8 @@ export default {
         priority: undefined,
         handler: undefined,
         dateRange: [],
-        sort: '+id'
+        sort: '+id',
+        eventType: undefined
       },
       statusOptions: [
         { label: '待处理', value: '待处理' },
@@ -558,7 +584,8 @@ export default {
         priority: '中',
         creator: '',
         creatorRole: '',
-        creatorDept: []
+        creatorDept: [],
+        eventType: ''
       },
       rules: {
         title: [{ required: true, message: '请输入事件标题', trigger: 'blur' }],
@@ -592,7 +619,16 @@ export default {
       collaborateRules: {
         collaborators: [{ required: true, message: '请选择协作人员', trigger: 'change' }],
         reason: [{ required: true, message: '请输入协作说明', trigger: 'blur' }]
-      }
+      },
+      eventTypeOptions: [
+        { label: '网络故障', value: '网络故障' },
+        { label: '系统故障', value: '系统故障' },
+        { label: '硬件故障', value: '硬件故障' },
+        { label: '软件故障', value: '软件故障' },
+        { label: '账号问题', value: '账号问题' },
+        { label: '数据问题', value: '数据问题' },
+        { label: '其他问题', value: '其他问题' }
+      ]
     }
   },
   created() {
@@ -609,7 +645,7 @@ export default {
   methods: {
     checkPermission,
     getList() {
-      const { keyword, status, priority, handler, viewType, dateRange, sort } = this.listQuery
+      const { keyword, status, priority, handler, viewType, dateRange, sort, eventType } = this.listQuery
       
       let filteredList = [...mockList]
 
@@ -650,6 +686,11 @@ export default {
           const itemDate = new Date(item.createTime)
           return itemDate >= startDate && itemDate <= endDate
         })
+      }
+
+      // 事件类型过滤
+      if (eventType) {
+        filteredList = filteredList.filter(item => item.eventType === eventType)
       }
 
       // 添加排序逻辑
@@ -704,7 +745,8 @@ export default {
         priority: '中',
         creator: '',
         creatorRole: '',
-        creatorDept: []
+        creatorDept: [],
+        eventType: ''
       }
     },
     createData() {

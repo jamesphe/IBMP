@@ -37,7 +37,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="���态">
+        <el-form-item label="状态">
           <el-select v-model="listQuery.status" placeholder="请选择" clearable class="filter-item">
             <el-option label="待处理" value="pending" />
             <el-option label="处理中" value="processing" />
@@ -173,7 +173,7 @@
     >
       <el-form ref="processForm" :model="processForm" :rules="processRules" label-width="80px">
         <el-form-item label="状态" prop="status">
-          <el-select v-model="processForm.status" placeholder="���选择状态" style="width: 100%">
+          <el-select v-model="processForm.status" placeholder="请选择状态" style="width: 100%">
             <el-option label="处理中" value="processing" />
             <el-option label="待验证" value="validating" />
             <el-option label="已完成" value="completed" />

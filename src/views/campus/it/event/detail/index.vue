@@ -101,14 +101,14 @@
           </el-col>
           <el-col :span="8">
             <div class="info-item">
-              <span class="info-label">当前状态：</span>
-              <el-tag :type="eventDetail.status | statusFilter">{{ eventDetail.status }}</el-tag>
+              <span class="info-label">事件类型：</span>
+              <el-tag size="medium">{{ eventDetail.eventType }}</el-tag>
             </div>
           </el-col>
           <el-col :span="8">
             <div class="info-item">
-              <span class="info-label">处理人：</span>
-              <span>{{ eventDetail.handler || '待分配' }}</span>
+              <span class="info-label">当前状态：</span>
+              <el-tag :type="eventDetail.status | statusFilter">{{ eventDetail.status }}</el-tag>
             </div>
           </el-col>
         </el-row>
@@ -254,7 +254,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="��理说明" prop="content" required>
+        <el-form-item label="处理说明" prop="content" required>
           <el-input
             type="textarea"
             v-model="recordForm.content"
@@ -485,13 +485,14 @@ const mockEventDetail = {
     }
   ],
   isEscalated: false,
-  collaborators: []
+  collaborators: [],
+  eventType: '系统故障'
 }
 
 // 处理动作选项
 const actionOptions = [
   { value: '开始处理', label: '开始处理', desc: '接手处理事件' },
-  { value: '处理中', label: '处理中', desc: '记��处理进展' },
+  { value: '处理中', label: '处理中', desc: '记录处理进展' },
   { value: '转交处理', label: '转交处理', desc: '转交给其他人处理' },
   { value: '处理完成', label: '处理完成', desc: '事件处理完成' }
 ]
@@ -535,7 +536,7 @@ export default {
       },
       recordRules: {
         action: [{ required: true, message: '请选择处理动作', trigger: 'change' }],
-        content: [{ required: true, message: '��输入处理说明', trigger: 'blur' }]
+        content: [{ required: true, message: '请输入处理说明', trigger: 'blur' }]
       },
       actionOptions,
       escalateForm: {

@@ -10,6 +10,9 @@
             class="filter-item"
             @keyup.enter.native="handleFilter"
           />
+          <el-select v-model="listQuery.eventType" placeholder="事件类型" clearable class="filter-item" style="width: 130px">
+            <el-option v-for="item in eventTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
           <el-select v-model="listQuery.priority" placeholder="优先级" clearable class="filter-item" style="width: 130px">
             <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
@@ -25,6 +28,11 @@
             </template>
           </el-table-column>
           <el-table-column label="事件标题" prop="title" min-width="200" show-overflow-tooltip />
+          <el-table-column label="事件类型" min-width="120" align="center">
+            <template slot-scope="{row}">
+              <el-tag size="medium">{{ row.eventType }}</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="优先级" width="100" align="center">
             <template slot-scope="{row}">
               <el-tag :type="row.priority | priorityFilter">{{ row.priority }}</el-tag>
@@ -210,7 +218,8 @@ const mockDispatchList = [
     priority: '高',
     creator: '李老师',
     creatorDept: ['信息工程学院', '网络工程系'],
-    createTime: '2024-03-02 14:30:00'
+    createTime: '2024-03-02 14:30:00',
+    eventType: '网络故障'
   },
   {
     id: 'EV2024030008',
@@ -218,7 +227,8 @@ const mockDispatchList = [
     priority: '紧急',
     creator: '张主任',
     creatorDept: ['行政部门', '教务处'],
-    createTime: '2024-03-02 15:00:00'
+    createTime: '2024-03-02 15:00:00',
+    eventType: '系统故障'
   }
 ]
 
@@ -271,7 +281,8 @@ export default {
         page: 1,
         limit: 20,
         keyword: undefined,
-        priority: undefined
+        priority: undefined,
+        eventType: undefined
       },
       // 规则列表相关
       rulesList: [],
@@ -317,7 +328,10 @@ export default {
         { label: '网络故障', value: '网络故障' },
         { label: '系统故障', value: '系统故障' },
         { label: '硬件故障', value: '硬件故障' },
-        { label: '软件故障', value: '软件故障' }
+        { label: '软件故障', value: '软件故障' },
+        { label: '账号问题', value: '账号问题' },
+        { label: '数据问题', value: '数据问题' },
+        { label: '其他问题', value: '其他问题' }
       ],
       groupOptions: [
         { label: '网络运维组', value: '网络运维组' },

@@ -488,7 +488,7 @@ export default {
       typeOptions: [
         { value: 'hardware', label: '硬件故障' },
         { value: 'software', label: '软件故障' },
-        { value: 'network', label: '网���故障' },
+        { value: 'network', label: '网络故障' },
         { value: 'service', label: '服务请求' },
         { value: 'maintenance', label: '日常维护' },
         { value: 'other', label: '其他' }
